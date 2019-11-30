@@ -1,0 +1,154 @@
+---
+title: 'A descriptive look at Veteran unemployment'
+authors:
+- ivan
+date: "2018-09-25"
+summary: Descriptive analysis of unemployment among the Veteran population of New York State
+image:
+  caption:
+  focal_point: 'center'
+output:
+  blogdown::html_page:
+    toc: false
+    toc_depth: 1
+url_code: "https://github.com/iecastro/veteran-unemployment"
+tags: [veterans, OpenData]
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE)
+
+```
+
+On any given year, is the President really the one to praise (or blame) for the country's economic situation? I don't ask this in a partisan way, I simply don't understand the intricacies of [economics](https://www.npr.org/tags/146988256/u-s-economy). When employment statistics are released, they tend to vary by industry, location, and population. Not all Americans experience the same economy. Ultimately, the economy is a complex system, and statistics come with a certain level of uncertainty and manipulation.
+
+
+Lets look at this statistic:
+
+![](DOL_veterans2018.png)
+
+
+That is great, no doubt --but, it doesn't tell us everything. Let's look at the annual averages across the country in 2017. We can see that unemployment among Veterans differs by State. Is the economic environment in Rhode Island that much different from Vermont or Maine? Why?
+
+```{r, echo=FALSE}
+knitr::include_graphics("vet-unemployment-states.png")
+
+```
+
+
+## New York Data
+
+Let's focus on New York State. Open Data NY released numbers on the [*Employment Status of the Veteran Population*](https://data.ny.gov/Economic-Development/Employment-Status-of-the-Veteran-Population-18-Yea/xnam-chv6). This post will describe and summarize these estimates
+
+```{r}
+library(tidyverse)
+
+file <- curl::curl_download(
+  "https://github.com/iecastro/veteran-unemployment/raw/master/data%20and%20codebook/cpsdata_APR2018.xlsx",
+  destfile = tempfile())
+
+vetdata <- readxl::read_excel(file)
+
+vetdata %>% 
+  knitr::kable()
+
+```
+
+
+### Veteran unemployment 
+
+In NYS, the unemployment rate among Post-9/11 Veterans has had a downward trend
+over the years. However, with the exception of 2015 & 2017, unemployment in this population is higher than in non-Veterans (and across all Veterans). 
+
+ 
+```{r, fig.height= 8, fig.width=8} 
+
+vetdata %>% 
+  filter(ServicePeriod %in% 
+           c("Gulf War-era II","Nonveterans","All Veterans")) %>%
+  ggplot(aes(as.factor(Year),Unempl_pct)) + 
+  geom_col(aes(fill=ServicePeriod), 
+           position = "dodge2")+
+  theme_minimal() + 
+  scale_fill_viridis_d(option = "cividis") +
+  labs(fill = " ", y = " ", x = " ",
+       caption = 
+         "Source: data.ny.gov \n*Data suppresed for estimates of less than 5,000 individuals") + 
+  scale_y_continuous(labels=scales::percent) + 
+  theme(axis.text = element_text(color = "black")) +
+  annotate("text", x = "2015", y = .05, label = "*", size = 6.3) +
+  annotate("text", x = "2017", y = .05, label = "*", size = 6.3) +
+  ggtitle("Labor Force - Unemployed", 
+          subtitle = "New York State - CPS estimates")  
+
+```
+
+*Unemployed* refers to people in the labor force who are not working but have been looking for work and are currently available to work. The labor force is comprised of all who are either employed or unemployed. The percentage of the labor force unemployed is the unemployment rate -- although, it is not really a [rate](http://sphweb.bumc.bu.edu/otlt/MPH-Modules/PH/BasicQuantitativeConcepts/BasicQuantitativeConcepts4.html), but, what do I know?
+
+### Veteran participation rate
+
+The labor force participation rate (again, not really a rate) of Post-9/11 Veterans hasn't dropped below 75% in almost a decade. You may have never heard of the participation rate (I hadn't until I started exploring this dataset),so to compare, in 2016 the NYS labor force participation rate was [62.8%](https://www.osc.state.ny.us/reports/economic/labor-force-trends-nys-2017.pdf) -- that is, one-third of the working age population (not in prison or active duty military) does not participate in the labor force.  The national participation rate is not any [higher](https://data.bls.gov/timeseries/LNS11300000). 
+
+
+```{r, fig.height= 8, fig.width=8}
+vetdata %>% 
+  filter(ServicePeriod == "Gulf War-era II") %>%
+    ggplot(aes(as.factor(Year), LabForce_pct,
+               color = CivNonInstPop)) +
+    geom_point(size = 5) + 
+  geom_segment(aes(x = as.factor(Year), y = .50, 
+                   yend = LabForce_pct, xend = as.factor(Year))) + 
+  scale_y_continuous(labels = scales::percent) + 
+  scale_color_viridis_c(direction = -1,
+                        labels = scales::comma) +
+  labs(color = "Population", 
+       x = " ", y = " ", 
+       caption = "Source: data.ny.gov") + 
+  theme_minimal() + 
+  theme(axis.text = element_text(color = "black")) +
+    ggtitle(
+      "Labor force participation rate among Post-9/11 Veterans is steady, \nin spite of an increasing population",
+      subtitle = "New Yorsk State CPS estimates 2017")
+```
+
+As more Veterans return home, they are still active participants in the labor force. Only one-fith of this population does not participate in the labor force; and that includes Veterans who have retired, are disabled and unable to work, or currently attending school.
+
+### Odds of unemployment 
+
+Although Post-911 Veterans are more active participants than non-Veterans, they have higher odds of being unemployed.
+
+
+```{r, echo=FALSE,fig.height= 8, fig.width=8}
+
+knitr::include_graphics("p911-or.png")
+
+```
+
+The odds ratio (OR) tells us the odds of being unemployed if you're a Post-9/11 Veteran compared to the odds of being unemployed if you're not a Veteran. 
+
+In 2010, Post-9/11 Veterans were *twice as likely* as a non-Veteran to be unemployed. These odds have improved over the years, and in 2017, Post-9/11 Veterans were about 20% *less likely* to be unemployed than non-Veterans. Somthing happened in 2016, couldn't tell you what.
+
+And interesting association in this dataset is that Gulf War Veterans have better odds than Post-9/11 Veterans.  They actually tend to have better odds than non-Veterans. 
+
+
+```{r, echo = FALSE,fig.height= 8, fig.width=8}
+
+knitr::include_graphics("all-vets-or.png")
+
+```
+
+### Limitations
+
+These associations are limited to the data available, so it is not possible to assess if these odds are affected by other variables, such as demographics, educational level, or technical skills.
+
+*It's important to note these data are not official BLS estimates, and have limitations regarding how they were sampled and calculated.*
+
+The NYS Department of Labor derived annual averages from [Current Population Survey](https://www.bls.gov/cps/documentation.htm) (CPS) sample records. CPS is a national, monthly, household survey, with about 2,300 households interviewed in NYS each month.
+
+To calculate odds ratios for 2015 and 2017, the number unemployed was imputed by subtracting the number employed from the labor force count.
+
+Data and R code are posted in [GitHub](https://github.com/iecastro/veteran-unemployment). 
+
