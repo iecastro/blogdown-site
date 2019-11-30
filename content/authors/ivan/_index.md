@@ -1,7 +1,7 @@
 ---
 authors: 
 - Ivan Castro
-bio: "Have a background in research project coordination, biostatistics, and population health.  My applied public health interests include traumatic stress disorders, environmental toxicants, and community-level deprivation." 
+bio:  
 education:
   courses:
   - course: MSPH in Biostatistics
@@ -13,12 +13,19 @@ education:
 email: "iecastro@syr.edu"
 interests:
 - Spatial Epidemiology
-- Health Data Science
+- Health Data Science / statistics
 - Data Analysis and Visualization in R 
 social:
+- icon: paper-plane
+  icon_pack: fas
+  link: /contact
 - icon: github
   icon_pack: fab
   link: https://github.com/iecastro  
+- icon: linkedin-in
+  icon_pack: fab
+  link: https://www.linkedin.com/in/iecastro/
 superuser: true
 ---
 
+I have a background in research project coordination, biostatistics, and population health.  My applied public health interests include traumatic stress disorders, environmental toxicants, and community-level deprivation.
