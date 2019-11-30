@@ -10,7 +10,7 @@
   weight = 20
 
 [[main]]
-  name = "Talks"
+  name = "Presentations"
   url = "/talk"
   weight = 30
 
@@ -33,7 +33,7 @@
 # To enable, copy your resume/CV to `static/files/cv.pdf` 
 # and uncomment the lines below.
 [[main]]  
-  name = "CV"
+  name = "Resume"
   url = "files/resume.pdf"
   weight = 70
 
