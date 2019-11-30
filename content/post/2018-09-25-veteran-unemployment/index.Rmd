@@ -28,7 +28,11 @@ On any given year, is the President really the one to praise (or blame) for the 
 
 Lets look at this statistic:
 
-![](DOL_veterans2018.png)
+
+```{r, echo=FALSE}
+knitr::include_graphics("DOL_veterans2018.png")
+
+```
 
 
 That is great, no doubt --but, it doesn't tell us everything. Let's look at the annual averages across the country in 2017. We can see that unemployment among Veterans differs by State. Is the economic environment in Rhode Island that much different from Vermont or Maine? Why?
@@ -41,7 +45,7 @@ knitr::include_graphics("vet-unemployment-states.png")
 
 ## New York Data
 
-Let's focus on New York State. Open Data NY released numbers on the [*Employment Status of the Veteran Population*](https://data.ny.gov/Economic-Development/Employment-Status-of-the-Veteran-Population-18-Yea/xnam-chv6). This post will describe and summarize these estimates
+Let's focus on New York State. Open Data NY released numbers on the [*Employment Status of the Veteran Population*](https://data.ny.gov/Economic-Development/Employment-Status-of-the-Veteran-Population-18-Yea/xnam-chv6). This post will describe and summarize these estimates.
 
 ```{r}
 library(tidyverse)
@@ -52,9 +56,8 @@ file <- curl::curl_download(
 
 vetdata <- readxl::read_excel(file)
 
-vetdata %>% 
-  knitr::kable()
-
+knitr::kable(head(vetdata),
+             format = "html")
 ```
 
 

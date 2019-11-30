@@ -20,12 +20,12 @@ tags: [veterans, open data]
 
 <p>On any given year, is the President really the one to praise (or blame) for the country’s economic situation? I don’t ask this in a partisan way, I simply don’t understand the intricacies of <a href="https://www.npr.org/tags/146988256/u-s-economy">economics</a>. When employment statistics are released, they tend to vary by industry, location, and population. Not all Americans experience the same economy. Ultimately, the economy is a complex system, and statistics come with a certain level of uncertainty and manipulation.</p>
 <p>Lets look at this statistic:</p>
-<p><img src="DOL_veterans2018.png" /></p>
+<p><img src="DOL_veterans2018.png" /><!-- --></p>
 <p>That is great, no doubt –but, it doesn’t tell us everything. Let’s look at the annual averages across the country in 2017. We can see that unemployment among Veterans differs by State. Is the economic environment in Rhode Island that much different from Vermont or Maine? Why?</p>
 <p><img src="vet-unemployment-states.png" /><!-- --></p>
 <div id="new-york-data" class="section level2">
 <h2>New York Data</h2>
-<p>Let’s focus on New York State. Open Data NY released numbers on the <a href="https://data.ny.gov/Economic-Development/Employment-Status-of-the-Veteran-Population-18-Yea/xnam-chv6"><em>Employment Status of the Veteran Population</em></a>. This post will describe and summarize these estimates</p>
+<p>Let’s focus on New York State. Open Data NY released numbers on the <a href="https://data.ny.gov/Economic-Development/Employment-Status-of-the-Veteran-Population-18-Yea/xnam-chv6"><em>Employment Status of the Veteran Population</em></a>. This post will describe and summarize these estimates.</p>
 <pre class="r"><code>library(tidyverse)
 
 file &lt;- curl::curl_download(
@@ -34,599 +34,235 @@ file &lt;- curl::curl_download(
 
 vetdata &lt;- readxl::read_excel(file)
 
-vetdata %&gt;% 
-  knitr::kable()</code></pre>
+knitr::kable(head(vetdata),
+             format = &quot;html&quot;)</code></pre>
 <table>
 <thead>
-<tr class="header">
-<th align="right">Year</th>
-<th align="left">ServicePeriod</th>
-<th align="right">CivNonInstPop</th>
-<th align="right">Labor Force</th>
-<th align="right">LabForce_pct</th>
-<th align="right">Employed</th>
-<th align="right">Empl_pct</th>
-<th align="right">Unemployed</th>
-<th align="right">Unempl_pct</th>
-<th align="right">NotLaborForce</th>
+<tr>
+<th style="text-align:right;">
+Year
+</th>
+<th style="text-align:left;">
+ServicePeriod
+</th>
+<th style="text-align:right;">
+CivNonInstPop
+</th>
+<th style="text-align:right;">
+Labor Force
+</th>
+<th style="text-align:right;">
+LabForce_pct
+</th>
+<th style="text-align:right;">
+Employed
+</th>
+<th style="text-align:right;">
+Empl_pct
+</th>
+<th style="text-align:right;">
+Unemployed
+</th>
+<th style="text-align:right;">
+Unempl_pct
+</th>
+<th style="text-align:right;">
+NotLaborForce
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="left">Nonveterans</td>
-<td align="right">14552100</td>
-<td align="right">9245000</td>
-<td align="right">0.635</td>
-<td align="right">8825400</td>
-<td align="right">0.606</td>
-<td align="right">419600</td>
-<td align="right">0.045</td>
-<td align="right">5307100</td>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:left;">
+Nonveterans
+</td>
+<td style="text-align:right;">
+14552100
+</td>
+<td style="text-align:right;">
+9245000
+</td>
+<td style="text-align:right;">
+0.635
+</td>
+<td style="text-align:right;">
+8825400
+</td>
+<td style="text-align:right;">
+0.606
+</td>
+<td style="text-align:right;">
+419600
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+5307100
+</td>
 </tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="left">All Veterans</td>
-<td align="right">759800</td>
-<td align="right">322600</td>
-<td align="right">0.425</td>
-<td align="right">309900</td>
-<td align="right">0.408</td>
-<td align="right">12700</td>
-<td align="right">0.039</td>
-<td align="right">437200</td>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:left;">
+All Veterans
+</td>
+<td style="text-align:right;">
+759800
+</td>
+<td style="text-align:right;">
+322600
+</td>
+<td style="text-align:right;">
+0.425
+</td>
+<td style="text-align:right;">
+309900
+</td>
+<td style="text-align:right;">
+0.408
+</td>
+<td style="text-align:right;">
+12700
+</td>
+<td style="text-align:right;">
+0.039
+</td>
+<td style="text-align:right;">
+437200
+</td>
 </tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">125800</td>
-<td align="right">100100</td>
-<td align="right">0.795</td>
-<td align="right">96300</td>
-<td align="right">0.766</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">25700</td>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:left;">
+Gulf War-era II
+</td>
+<td style="text-align:right;">
+125800
+</td>
+<td style="text-align:right;">
+100100
+</td>
+<td style="text-align:right;">
+0.795
+</td>
+<td style="text-align:right;">
+96300
+</td>
+<td style="text-align:right;">
+0.766
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+25700
+</td>
 </tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">79500</td>
-<td align="right">59700</td>
-<td align="right">0.751</td>
-<td align="right">58300</td>
-<td align="right">0.733</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">19800</td>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:left;">
+Gulf War-era I
+</td>
+<td style="text-align:right;">
+79500
+</td>
+<td style="text-align:right;">
+59700
+</td>
+<td style="text-align:right;">
+0.751
+</td>
+<td style="text-align:right;">
+58300
+</td>
+<td style="text-align:right;">
+0.733
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+19800
+</td>
 </tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">351200</td>
-<td align="right">67000</td>
-<td align="right">0.191</td>
-<td align="right">63800</td>
-<td align="right">0.182</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">284200</td>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:left;">
+Vietnam, Korean War, and World War II
+</td>
+<td style="text-align:right;">
+351200
+</td>
+<td style="text-align:right;">
+67000
+</td>
+<td style="text-align:right;">
+0.191
+</td>
+<td style="text-align:right;">
+63800
+</td>
+<td style="text-align:right;">
+0.182
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+284200
+</td>
 </tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="left">Other service periods</td>
-<td align="right">203300</td>
-<td align="right">95800</td>
-<td align="right">0.471</td>
-<td align="right">91500</td>
-<td align="right">0.450</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">107500</td>
-</tr>
-<tr class="odd">
-<td align="right">2016</td>
-<td align="left">Nonveterans</td>
-<td align="right">14533500</td>
-<td align="right">9114000</td>
-<td align="right">0.627</td>
-<td align="right">8690200</td>
-<td align="right">0.598</td>
-<td align="right">423800</td>
-<td align="right">0.046</td>
-<td align="right">5419500</td>
-</tr>
-<tr class="even">
-<td align="right">2016</td>
-<td align="left">All Veterans</td>
-<td align="right">798800</td>
-<td align="right">354700</td>
-<td align="right">0.444</td>
-<td align="right">334700</td>
-<td align="right">0.419</td>
-<td align="right">19900</td>
-<td align="right">0.056</td>
-<td align="right">444100</td>
-</tr>
-<tr class="odd">
-<td align="right">2016</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">116500</td>
-<td align="right">92900</td>
-<td align="right">0.798</td>
-<td align="right">83800</td>
-<td align="right">0.720</td>
-<td align="right">9100</td>
-<td align="right">0.098</td>
-<td align="right">23600</td>
-</tr>
-<tr class="even">
-<td align="right">2016</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">78600</td>
-<td align="right">64800</td>
-<td align="right">0.824</td>
-<td align="right">58900</td>
-<td align="right">0.749</td>
-<td align="right">5900</td>
-<td align="right">0.091</td>
-<td align="right">13800</td>
-</tr>
-<tr class="odd">
-<td align="right">2016</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">373200</td>
-<td align="right">79000</td>
-<td align="right">0.212</td>
-<td align="right">77900</td>
-<td align="right">0.209</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">294200</td>
-</tr>
-<tr class="even">
-<td align="right">2016</td>
-<td align="left">Other service periods</td>
-<td align="right">230500</td>
-<td align="right">118000</td>
-<td align="right">0.512</td>
-<td align="right">114100</td>
-<td align="right">0.495</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">112500</td>
-</tr>
-<tr class="odd">
-<td align="right">2015</td>
-<td align="left">Nonveterans</td>
-<td align="right">14431600</td>
-<td align="right">9130600</td>
-<td align="right">0.633</td>
-<td align="right">8657000</td>
-<td align="right">0.600</td>
-<td align="right">473600</td>
-<td align="right">0.052</td>
-<td align="right">5301000</td>
-</tr>
-<tr class="even">
-<td align="right">2015</td>
-<td align="left">All Veterans</td>
-<td align="right">837900</td>
-<td align="right">387600</td>
-<td align="right">0.463</td>
-<td align="right">373300</td>
-<td align="right">0.445</td>
-<td align="right">14400</td>
-<td align="right">0.037</td>
-<td align="right">450300</td>
-</tr>
-<tr class="odd">
-<td align="right">2015</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">110200</td>
-<td align="right">86200</td>
-<td align="right">0.782</td>
-<td align="right">81800</td>
-<td align="right">0.742</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">24100</td>
-</tr>
-<tr class="even">
-<td align="right">2015</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">95400</td>
-<td align="right">76700</td>
-<td align="right">0.804</td>
-<td align="right">75000</td>
-<td align="right">0.786</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">18700</td>
-</tr>
-<tr class="odd">
-<td align="right">2015</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">389400</td>
-<td align="right">98300</td>
-<td align="right">0.252</td>
-<td align="right">93700</td>
-<td align="right">0.241</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">291100</td>
-</tr>
-<tr class="even">
-<td align="right">2015</td>
-<td align="left">Other service periods</td>
-<td align="right">242900</td>
-<td align="right">126500</td>
-<td align="right">0.521</td>
-<td align="right">122700</td>
-<td align="right">0.505</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">116400</td>
-</tr>
-<tr class="odd">
-<td align="right">2014</td>
-<td align="left">Nonveterans</td>
-<td align="right">14293000</td>
-<td align="right">9037000</td>
-<td align="right">0.632</td>
-<td align="right">8473100</td>
-<td align="right">0.593</td>
-<td align="right">563900</td>
-<td align="right">0.062</td>
-<td align="right">5255900</td>
-</tr>
-<tr class="even">
-<td align="right">2014</td>
-<td align="left">All Veterans</td>
-<td align="right">895300</td>
-<td align="right">392100</td>
-<td align="right">0.438</td>
-<td align="right">369500</td>
-<td align="right">0.413</td>
-<td align="right">22600</td>
-<td align="right">0.058</td>
-<td align="right">503200</td>
-</tr>
-<tr class="odd">
-<td align="right">2014</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">112300</td>
-<td align="right">85700</td>
-<td align="right">0.763</td>
-<td align="right">78700</td>
-<td align="right">0.700</td>
-<td align="right">7100</td>
-<td align="right">0.083</td>
-<td align="right">26600</td>
-</tr>
-<tr class="even">
-<td align="right">2014</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">104500</td>
-<td align="right">80000</td>
-<td align="right">0.765</td>
-<td align="right">73600</td>
-<td align="right">0.705</td>
-<td align="right">6300</td>
-<td align="right">0.079</td>
-<td align="right">24500</td>
-</tr>
-<tr class="odd">
-<td align="right">2014</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">426200</td>
-<td align="right">100100</td>
-<td align="right">0.235</td>
-<td align="right">93300</td>
-<td align="right">0.219</td>
-<td align="right">6700</td>
-<td align="right">0.067</td>
-<td align="right">326100</td>
-</tr>
-<tr class="even">
-<td align="right">2014</td>
-<td align="left">Other service periods</td>
-<td align="right">252300</td>
-<td align="right">126400</td>
-<td align="right">0.501</td>
-<td align="right">123900</td>
-<td align="right">0.491</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">126000</td>
-</tr>
-<tr class="odd">
-<td align="right">2013</td>
-<td align="left">Nonveterans</td>
-<td align="right">14177300</td>
-<td align="right">9134100</td>
-<td align="right">0.644</td>
-<td align="right">8457200</td>
-<td align="right">0.597</td>
-<td align="right">677000</td>
-<td align="right">0.074</td>
-<td align="right">5043100</td>
-</tr>
-<tr class="even">
-<td align="right">2013</td>
-<td align="left">All Veterans</td>
-<td align="right">921400</td>
-<td align="right">401900</td>
-<td align="right">0.436</td>
-<td align="right">369100</td>
-<td align="right">0.401</td>
-<td align="right">32800</td>
-<td align="right">0.082</td>
-<td align="right">519600</td>
-</tr>
-<tr class="odd">
-<td align="right">2013</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">96500</td>
-<td align="right">80800</td>
-<td align="right">0.838</td>
-<td align="right">74300</td>
-<td align="right">0.770</td>
-<td align="right">6500</td>
-<td align="right">0.081</td>
-<td align="right">15700</td>
-</tr>
-<tr class="even">
-<td align="right">2013</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">102300</td>
-<td align="right">80200</td>
-<td align="right">0.784</td>
-<td align="right">73500</td>
-<td align="right">0.718</td>
-<td align="right">6700</td>
-<td align="right">0.084</td>
-<td align="right">22100</td>
-</tr>
-<tr class="odd">
-<td align="right">2013</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">459200</td>
-<td align="right">106700</td>
-<td align="right">0.232</td>
-<td align="right">94700</td>
-<td align="right">0.206</td>
-<td align="right">12000</td>
-<td align="right">0.113</td>
-<td align="right">352600</td>
-</tr>
-<tr class="even">
-<td align="right">2013</td>
-<td align="left">Other service periods</td>
-<td align="right">263300</td>
-<td align="right">134100</td>
-<td align="right">0.509</td>
-<td align="right">126700</td>
-<td align="right">0.481</td>
-<td align="right">7500</td>
-<td align="right">0.056</td>
-<td align="right">129200</td>
-</tr>
-<tr class="odd">
-<td align="right">2012</td>
-<td align="left">Nonveterans</td>
-<td align="right">14056300</td>
-<td align="right">8982400</td>
-<td align="right">0.639</td>
-<td align="right">8219800</td>
-<td align="right">0.585</td>
-<td align="right">762600</td>
-<td align="right">0.085</td>
-<td align="right">5073900</td>
-</tr>
-<tr class="even">
-<td align="right">2012</td>
-<td align="left">All Veterans</td>
-<td align="right">938900</td>
-<td align="right">450200</td>
-<td align="right">0.480</td>
-<td align="right">416100</td>
-<td align="right">0.443</td>
-<td align="right">34100</td>
-<td align="right">0.076</td>
-<td align="right">488700</td>
-</tr>
-<tr class="odd">
-<td align="right">2012</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">85300</td>
-<td align="right">72300</td>
-<td align="right">0.847</td>
-<td align="right">64600</td>
-<td align="right">0.758</td>
-<td align="right">7700</td>
-<td align="right">0.106</td>
-<td align="right">13000</td>
-</tr>
-<tr class="even">
-<td align="right">2012</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">98200</td>
-<td align="right">85700</td>
-<td align="right">0.873</td>
-<td align="right">80200</td>
-<td align="right">0.817</td>
-<td align="right">5500</td>
-<td align="right">0.064</td>
-<td align="right">12400</td>
-</tr>
-<tr class="odd">
-<td align="right">2012</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">465600</td>
-<td align="right">138900</td>
-<td align="right">0.298</td>
-<td align="right">128400</td>
-<td align="right">0.276</td>
-<td align="right">10500</td>
-<td align="right">0.076</td>
-<td align="right">326600</td>
-</tr>
-<tr class="even">
-<td align="right">2012</td>
-<td align="left">Other service periods</td>
-<td align="right">289800</td>
-<td align="right">153200</td>
-<td align="right">0.529</td>
-<td align="right">142800</td>
-<td align="right">0.493</td>
-<td align="right">10400</td>
-<td align="right">0.068</td>
-<td align="right">136600</td>
-</tr>
-<tr class="odd">
-<td align="right">2011</td>
-<td align="left">Nonveterans</td>
-<td align="right">13989700</td>
-<td align="right">8919300</td>
-<td align="right">0.638</td>
-<td align="right">8211700</td>
-<td align="right">0.587</td>
-<td align="right">707500</td>
-<td align="right">0.079</td>
-<td align="right">5070400</td>
-</tr>
-<tr class="even">
-<td align="right">2011</td>
-<td align="left">All Veterans</td>
-<td align="right">981200</td>
-<td align="right">477400</td>
-<td align="right">0.487</td>
-<td align="right">440300</td>
-<td align="right">0.449</td>
-<td align="right">37100</td>
-<td align="right">0.078</td>
-<td align="right">503900</td>
-</tr>
-<tr class="odd">
-<td align="right">2011</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">83100</td>
-<td align="right">66100</td>
-<td align="right">0.796</td>
-<td align="right">54900</td>
-<td align="right">0.660</td>
-<td align="right">11300</td>
-<td align="right">0.171</td>
-<td align="right">16900</td>
-</tr>
-<tr class="even">
-<td align="right">2011</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">93000</td>
-<td align="right">81600</td>
-<td align="right">0.877</td>
-<td align="right">80200</td>
-<td align="right">0.862</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">11400</td>
-</tr>
-<tr class="odd">
-<td align="right">2011</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">496000</td>
-<td align="right">163800</td>
-<td align="right">0.330</td>
-<td align="right">149700</td>
-<td align="right">0.302</td>
-<td align="right">14100</td>
-<td align="right">0.086</td>
-<td align="right">332200</td>
-</tr>
-<tr class="even">
-<td align="right">2011</td>
-<td align="left">Other service periods</td>
-<td align="right">309200</td>
-<td align="right">165900</td>
-<td align="right">0.537</td>
-<td align="right">155600</td>
-<td align="right">0.503</td>
-<td align="right">10300</td>
-<td align="right">0.062</td>
-<td align="right">143300</td>
-</tr>
-<tr class="odd">
-<td align="right">2010</td>
-<td align="left">Nonveterans</td>
-<td align="right">13826700</td>
-<td align="right">9073900</td>
-<td align="right">0.656</td>
-<td align="right">8320400</td>
-<td align="right">0.602</td>
-<td align="right">753400</td>
-<td align="right">0.083</td>
-<td align="right">4752800</td>
-</tr>
-<tr class="even">
-<td align="right">2010</td>
-<td align="left">All Veterans</td>
-<td align="right">1046200</td>
-<td align="right">475900</td>
-<td align="right">0.455</td>
-<td align="right">437200</td>
-<td align="right">0.418</td>
-<td align="right">38800</td>
-<td align="right">0.082</td>
-<td align="right">570200</td>
-</tr>
-<tr class="odd">
-<td align="right">2010</td>
-<td align="left">Gulf War-era II</td>
-<td align="right">60600</td>
-<td align="right">51100</td>
-<td align="right">0.843</td>
-<td align="right">43300</td>
-<td align="right">0.714</td>
-<td align="right">7800</td>
-<td align="right">0.152</td>
-<td align="right">9500</td>
-</tr>
-<tr class="even">
-<td align="right">2010</td>
-<td align="left">Gulf War-era I</td>
-<td align="right">84000</td>
-<td align="right">71400</td>
-<td align="right">0.850</td>
-<td align="right">68200</td>
-<td align="right">0.812</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">12600</td>
-</tr>
-<tr class="odd">
-<td align="right">2010</td>
-<td align="left">Vietnam, Korean War, and World War II</td>
-<td align="right">567100</td>
-<td align="right">177500</td>
-<td align="right">0.313</td>
-<td align="right">162000</td>
-<td align="right">0.286</td>
-<td align="right">15500</td>
-<td align="right">0.088</td>
-<td align="right">389600</td>
-</tr>
-<tr class="even">
-<td align="right">2010</td>
-<td align="left">Other service periods</td>
-<td align="right">334500</td>
-<td align="right">176000</td>
-<td align="right">0.526</td>
-<td align="right">163700</td>
-<td align="right">0.489</td>
-<td align="right">12300</td>
-<td align="right">0.070</td>
-<td align="right">158500</td>
+<tr>
+<td style="text-align:right;">
+2017
+</td>
+<td style="text-align:left;">
+Other service periods
+</td>
+<td style="text-align:right;">
+203300
+</td>
+<td style="text-align:right;">
+95800
+</td>
+<td style="text-align:right;">
+0.471
+</td>
+<td style="text-align:right;">
+91500
+</td>
+<td style="text-align:right;">
+0.450
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+107500
+</td>
 </tr>
 </tbody>
 </table>
@@ -651,7 +287,7 @@ over the years. However, with the exception of 2015 &amp; 2017, unemployment in 
   annotate(&quot;text&quot;, x = &quot;2017&quot;, y = .05, label = &quot;*&quot;, size = 6.3) +
   ggtitle(&quot;Labor Force - Unemployed&quot;, 
           subtitle = &quot;New York State - CPS estimates&quot;)  </code></pre>
-<p><img src="/post/2018-09-25-veteran-unemployment/index_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
+<p><img src="/post/2018-09-25-veteran-unemployment/index_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
 <p><em>Unemployed</em> refers to people in the labor force who are not working but have been looking for work and are currently available to work. The labor force is comprised of all who are either employed or unemployed. The percentage of the labor force unemployed is the unemployment rate – although, it is not really a <a href="http://sphweb.bumc.bu.edu/otlt/MPH-Modules/PH/BasicQuantitativeConcepts/BasicQuantitativeConcepts4.html">rate</a>, but, what do I know?</p>
 </div>
 <div id="veteran-participation-rate" class="section level3">
@@ -675,7 +311,7 @@ over the years. However, with the exception of 2015 &amp; 2017, unemployment in 
     ggtitle(
       &quot;Labor force participation rate among Post-9/11 Veterans is steady, \nin spite of an increasing population&quot;,
       subtitle = &quot;New Yorsk State CPS estimates 2017&quot;)</code></pre>
-<p><img src="/post/2018-09-25-veteran-unemployment/index_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
+<p><img src="/post/2018-09-25-veteran-unemployment/index_files/figure-html/unnamed-chunk-5-1.png" width="768" /></p>
 <p>As more Veterans return home, they are still active participants in the labor force. Only one-fith of this population does not participate in the labor force; and that includes Veterans who have retired, are disabled and unable to work, or currently attending school.</p>
 </div>
 <div id="odds-of-unemployment" class="section level3">
