@@ -1,7 +1,5 @@
 ---
 title: 'A descriptive look at Veteran unemployment'
-authors:
-- ivan
 date: "2018-09-25"
 summary: Descriptive analysis of unemployment among the Veteran population of New York State
 image:

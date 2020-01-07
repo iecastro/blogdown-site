@@ -13,12 +13,12 @@ education:
 email: "iecastro@syr.edu"
 interests:
 - Spatial Epidemiology
-- Health Data Science / statistics
+- Health Data Science / Statistics
 - Data Analysis and Visualization in R 
 social:
 - icon: paper-plane
   icon_pack: fas
-  link: /contact
+  link: /#contact
 - icon: github
   icon_pack: fab
   link: https://github.com/iecastro  
