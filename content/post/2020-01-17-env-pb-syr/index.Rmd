@@ -9,7 +9,7 @@ output:
   blogdown::html_page:
     toc: false
     toc_depth: 1
-url_code: "https://raw.githubusercontent.com/iecastro/blogdown-site/blob/master/content/post/2020-01-15-env-pb-syr/index.Rmd"
+url_code: "https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-01-17-env-pb-syr/index.Rmd"
 tags: [syracuse, open data]
 editor_options: 
   chunk_output_type: console
@@ -27,7 +27,6 @@ library(tigris)
 library(sf)
 library(leaflet)
 library(DT)
-library(widgetframe)
 library(gganimate)
 
 options(tigris_class = "sf",
@@ -73,7 +72,7 @@ tnt <- tnt %>%
 
 Elevated blood lead levels in children is endemic in Syracuse, particularly across the city's poorest neighborhoods and refugee communities. A big reason for this, is the aging housing stock not being properly maintained.  Currently, there are 209 open cases of lead violations cited by the county health department:   
 
-```{r, fig.cap='Open lead violations as of 12/18/19. Hover points for street address. Source: data.syr.net'}
+```{r, fig.cap='Open lead violations as of 12/18/19. Hover points for street address. Source: data.syrgov.net'}
 map_data <- lead_viol %>% 
   mutate(lubridate::year(case_open_date),
          complaint = stringr::str_trim(nature_of_complaint),
@@ -108,7 +107,7 @@ map_data %>%
 
 ```
 
-Unresolved lead violation cases are concentrated in the Southside and Northside sectors of the city, and about half of these cases have been open since 2018 or earlier (some go back as far as 2013).  See this [dashboard for details](iecastro.github.io/syr-lead-viol) on each open case.
+Unresolved lead violation cases are concentrated in the Southside and Northside sectors of the city, and about half of these cases have been open since 2018 or earlier (some go back as far as 2013).  See this [dashboard for details](https://iecastro.github.io/syr-lead-viol) on each open case.
 
 ```{r}
 lead_viol %>% 
@@ -117,6 +116,7 @@ lead_viol %>%
   group_by(year, 
            case_status) %>% 
   count() %>% 
+  rename(`Case Status` = case_status) %>% 
   spread(key = year, value = n) %>% 
   knitr::kable()
 
@@ -206,7 +206,11 @@ merged %>%
 
 ```
 
-Data source: [Syracuse Poverty Index](https://github.com/jamisoncrawford/index)
+Data sources:  
+
+- [Syracuse Open Data](http://data.syrgov.net/datasets/5a03e6e9ea234a37b5c5e2923a067a2e_0)  
+
+- [Syracuse Poverty Index](https://github.com/jamisoncrawford/index)  
 
 
 ```{r, eval = FALSE}
