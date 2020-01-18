@@ -1,0 +1,256 @@
+---
+title: "Exploring lead hazards in the City of Syracuse"
+date: "2020-01-17"
+summary:
+image:
+  caption:
+  focal_point: 'center'
+output:
+  blogdown::html_page:
+    toc: false
+    toc_depth: 1
+url_code: "https://raw.githubusercontent.com/iecastro/blogdown-site/blob/master/content/post/2020-01-15-env-pb-syr/index.Rmd"
+tags: [syracuse, open data]
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE,
+  fig.align = "center")
+
+library(tidyverse)
+library(tigris)
+library(sf)
+library(leaflet)
+library(DT)
+library(widgetframe)
+library(gganimate)
+
+options(tigris_class = "sf",
+        knitr.kable.NA = '')
+
+#-- ingest ---
+
+# syr children data
+syr <- readr::read_csv("data/syr-children-data.csv") %>% 
+  mutate(year = as.factor(year),
+         ebll = ebll_pct / 100) 
+
+# census tract geometry
+syr_tracts <- tracts("NY", "Onondaga", cb = TRUE) %>%
+  filter(as.numeric(GEOID) < 36067006104)
+
+merged <- left_join(syr, syr_tracts,
+          by = "GEOID") %>% 
+  sf::st_as_sf()
+
+# lead violations
+# updated by SYR open data on 12/18/2019
+lead_viol <- sf::read_sf("https://opendata.arcgis.com/datasets/5a03e6e9ea234a37b5c5e2923a067a2e_0.geojson")
+
+tnt <- read_sf("https://opendata.arcgis.com/datasets/9d0b1394cbd749c8bdf2394f80616240_0.geojson")
+
+```
+
+
+```{r check-crs}
+#sf::st_crs(merged)
+#sf::st_crs(lead_viol)
+
+proj <- sf::st_crs(merged)
+
+lead_viol <- lead_viol %>% 
+  sf::st_transform(proj)
+
+tnt <- tnt %>% 
+  sf::st_transform(proj)
+
+```
+
+Elevated blood lead levels in children is endemic in Syracuse, particularly across the city's poorest neighborhoods and refugee communities. A big reason for this, is the aging housing stock not being properly maintained.  Currently, there are 209 open cases of lead violations cited by the county health department:   
+
+```{r, fig.cap='Open lead violations as of 12/18/19. Hover points for street address. Source: data.syr.net'}
+map_data <- lead_viol %>% 
+  mutate(lubridate::year(case_open_date),
+         complaint = stringr::str_trim(nature_of_complaint),
+         complaint = str_replace_all(complaint, "\r\n" , " "),
+         vacant = ifelse(is.na(vacant_property), "No", "Yes"),
+         case_open_date = lubridate::as_date(case_open_date)) %>% 
+  select(TNT = TNT_NAME,
+         Address = property_address,
+         Vacant = vacant,
+         Neighborhood = neighborhood,
+         Violation = complaint,
+         Case = case_number,
+         Opened = case_open_date,
+         Status = case_status,
+         Owner = property_owner_name
+  )
+
+center <- map_data %>%
+  summarise() %>%
+  st_centroid() %>% 
+  st_coordinates() %>% 
+  as_tibble()
+
+map_data %>% 
+  as_Spatial() %>% 
+  leaflet() %>%
+  setView(lng = center$X,
+          lat = center$Y,
+          zoom = 13) %>% 
+  addTiles() %>% 
+  addCircles(label = ~Address)
+
+```
+
+Unresolved lead violation cases are concentrated in the Southside and Northside sectors of the city, and about half of these cases have been open since 2018 or earlier (some go back as far as 2013).  See this [dashboard for details](iecastro.github.io/syr-lead-viol) on each open case.
+
+```{r}
+lead_viol %>% 
+  st_set_geometry(NULL) %>% 
+  mutate(year = lubridate::year(case_open_date)) %>% 
+  group_by(year, 
+           case_status) %>% 
+  count() %>% 
+  spread(key = year, value = n) %>% 
+  knitr::kable()
+
+```
+
+
+```{r, fig.cap='Geographic concentration of open lead violations'}
+ggplot() + 
+  geom_sf(data = syr_tracts, # tract geometry
+          fill = "lightblue", 
+          color = "#FFFFFF",
+          alpha = .8) +
+  geom_sf(data = lead_viol,
+          color =  "#A65949") +
+  stat_density2d(data = st_coordinates(
+    lead_viol) %>% 
+      as_tibble(),
+    aes(X, Y,
+        fill = ..level..), 
+    alpha = .4,
+    geom = "polygon") + 
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        legend.position = "none") +
+  scico::scale_fill_scico() +
+  labs(x = "", y = "")
+
+
+```
+
+
+[In 2018](https://www.syracuse.com/health/2019/09/want-to-fight-lead-paint-poisoning-in-syracuse-town-hall-meetings-scheduled.html), 10% of children tested had elevated blood lead - defined as five or greater micrograms of lead per deciliter of blood (>=5 mcg/dL). This burden, however, is not experienced equally across neighborhoods. There is a lot of variability across the 55 census-tracts in Syracuse, ranging from zero to as high as 25% of children tested having elevated blood lead.
+
+```{r, fig.cap='Distribution of tract-level percentages of children under-6 with elevated levels of blood lead (>=5 mcg/dL)'}
+
+syr %>% 
+  filter(GEOID != "City") %>% # seems like city counts with label in geoid col
+  ggplot(aes(year, ebll)) +
+  geom_jitter(color = "#14303E",
+              position = position_jitter(
+                width = .2,
+                height = .015,
+                seed = 245)) +
+  geom_boxplot(fill = NA, color = "#14303E",
+               alpha = .7) +
+  theme_minimal() +
+  labs(x = "",
+       y = "Children under-6 with elevated blood lead") +
+  theme(axis.text = element_text(color = "black"),
+        axis.title.y = element_text(hjust = 1)) +
+  scale_y_continuous(labels = scales::percent)
+
+```
+
+
+```{r, fig.path="figs/animate-", fig.cap='Map of tract-level percentages of children under-6 with elevated levels of blood lead (>=5 mcg/dL)'}
+
+SouthCampus <- merged %>% filter(GEOID == "36067005602") %>%
+  st_centroid()
+
+MainCampus <- merged %>% filter(GEOID == "36067004302") %>%
+  st_centroid()
+
+
+merged %>% 
+  filter(GEOID != "City")  %>% 
+  mutate(year = 
+           as.numeric(
+             as.character(year)
+           )) %>% 
+  ggplot() + 
+  geom_sf(aes(fill = ebll),
+          color = NA) +
+  geom_sf(data = MainCampus, size = .5) +
+  geom_sf(data = SouthCampus, size = .5) +
+  scico::scale_fill_scico(palette = "tokyo",
+                          direction = -1,
+                          labels = scales::percent,
+                          na.value = "gray90") +
+  theme_minimal() +
+  theme(axis.text = element_blank()) +
+  labs(fill = "",
+       title = 'Year: {closest_state}',
+       caption = "*Syracuse University's Main and South Campus \nGray areas had no data available") +
+  gganimate::transition_states(year) +
+  exit_recolor()
+
+```
+
+Data source: [Syracuse Poverty Index](https://github.com/jamisoncrawford/index)
+
+
+```{r, eval = FALSE}
+lead_viol %>% 
+    st_set_geometry(NULL) %>% 
+    group_by(property_owner_name) %>% 
+    count() %>% filter(n >= 2)
+
+lead_viol %>% 
+  st_set_geometry(NULL) %>% 
+  filter(property_owner_name == "GSPDC") %>% 
+  group_by(lubridate::year(case_open_date),
+           case_status) %>% 
+  count()
+
+
+```
+
+
+```{r, eval = FALSE}
+# Properties with open lead violations owned by the GSPDC n=16
+ggplot() +
+  geom_sf(data = syr_tracts, # tract geometry
+          fill = "lightblue", 
+          color = "#FFFFFF") +
+  geom_sf(data = lead_viol %>% 
+            mutate(landbank = 
+                     ifelse(property_owner_name == "GSPDC",
+                            "landbank", "other")) %>% 
+                     filter(landbank == "other"),
+          color = "gray",
+          fill = NA) +
+    geom_sf(data = lead_viol %>% 
+            mutate(landbank = 
+                     ifelse(property_owner_name == "GSPDC",
+                            "landbank", "other")) %>% 
+                     filter(landbank == "landbank"),
+          color = "tomato") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        legend.position = "none") +
+  labs(x = "", y = "")
+
+
+```
+
+
