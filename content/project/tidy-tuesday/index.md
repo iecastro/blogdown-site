@@ -5,7 +5,7 @@ image:
   focal_point: Smart
 summary: A collection of Tidy Tuesday plots.
 tags:
-- r
+- R
 - tidyverse
 - data viz
 title: '#tidytuesday'
