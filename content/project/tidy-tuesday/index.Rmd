@@ -1,0 +1,136 @@
+---
+title: "#tidytuesday"
+date: '`r Sys.Date()`'
+summary: A collection of Tidy Tuesday plots.
+image:
+  caption:
+  focal_point: 'center'
+output:
+  blogdown::html_page:
+    toc: false
+    toc_depth: 1
+url_code: "https://github.com/iecastro/tidy-tuesday"
+tags: [R, tidyverse, data viz]
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE,
+                      tidy = FALSE, 
+                      message = FALSE,
+                      warning = FALSE)
+
+```
+
+
+A collection of plots using data from the #tidytuesday project  
+
+# Beer production (2020-03-31) 
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-03-31-beer-production/production-statebin.png")
+
+```
+
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-03-31-beer-production/production-dumbbell.png")
+
+```
+
+# TBI (2020-03-24)
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-03-24-tbi/agebycause-props2.png")
+
+```
+
+
+```{r,  fig.fullwidth = TRUE}
+ knitr::include_graphics("plots/2020-03-24-tbi/tbi-causes.png")
+```
+
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-03-24-tbi/mil-tbi.png")
+```
+
+
+
+# The Office (2020-03-17)
+
+```{r}
+knitr::include_graphics("plots/2020-03-17-the-office/plot2.png")
+
+```
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-03-17-the-office/plot1.png")
+
+```
+
+
+# MMR vaccination (2020-02-25)  
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-02-25-measles/ny-rates.png")
+```
+
+
+
+# Food Consumption (2020-02-18)  
+
+```{r, fig.cap="Although CO2 emissions increase with consumption, regardless of food type, an interaction model shows us that on average CO2 emissions are higher with animal-food consumption than with plant-based consumption"}
+knitr::include_graphics("plots/2020-02-18-food-consumption/interaction.png")
+```
+
+
+```{r, fig.cap="Using a log-log plot really helps us see the relationship between these variables"}
+knitr::include_graphics("plots/2020-02-18-food-consumption/type-facet.png")
+```
+
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-02-18-food-consumption/log-scales.png")
+```
+
+
+
+
+# NFL Standings (2020-02-04)
+
+
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-02-04-nfl-attendance/margins.jpeg")
+```
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-02-04-nfl-attendance/away_attend.jpeg")
+```
+
+
+
+# Spotify Songs (2020-01-21)
+
+
+```{r}
+knitr::include_graphics("plots/2020-01-21-spotify/spotify-unnamed-chunk-1-1.gif")
+
+```
+
+
+```{r,  fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-01-21-spotify/patch_one.png")
+
+```
+
+
+```{r,  fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-01-21-spotify/patch_two.png")
+
+```
+
