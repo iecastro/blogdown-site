@@ -28,6 +28,14 @@ knitr::opts_chunk$set(echo = FALSE,
 
 A collection of plots using data from the #tidytuesday project  
 
+# Best hip-hop songs (2020-04-14)
+
+```{r, fig.fullwidth = TRUE}
+knitr::include_graphics("plots/2020-04-14-rap-songs/biggie-chart.png")
+
+```
+
+
 # Beer production (2020-03-31) 
 
 ```{r, fig.fullwidth = TRUE}
