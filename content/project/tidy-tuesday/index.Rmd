@@ -28,6 +28,23 @@ knitr::opts_chunk$set(echo = FALSE,
 
 A collection of plots using data from the #tidytuesday project  
 
+
+# Broadway Box Office
+
+```{r}
+knitr::include_graphics("plots/2020-04-28-broadway/weekly-gross.png")
+
+```
+
+
+# GDPR Violations (2020-04-20)
+
+```{r}
+knitr::include_graphics("plots/2020-04-20-gdpr/linesaber-plot.png")
+
+```
+
+
 # Best hip-hop songs (2020-04-14)
 
 ```{r, fig.fullwidth = TRUE}
