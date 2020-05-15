@@ -1,11 +1,3 @@
-# monthly returns for individual securities
-returns_combined <- tq_get(unique(weights$symbol),  
-                           get = "stock.prices",
-                           from = start_date) %>% 
-  group_by(symbol) %>%
-  tq_transmute(adjusted, periodReturn, 
-               period = "monthly",
-               col_rename = "Ra")
 
 # portfolio returns
 get_returns <- function(return_df, weight_df, growth = FALSE){

@@ -7,7 +7,8 @@ image:
   focal_point: 'center'
 output:
   blogdown::html_page:
-    toc: false
+    toc: true
+    number_sections: yes
     toc_depth: 1
 url_code: "https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/index.Rmd"
 links:
@@ -17,11 +18,34 @@ editor_options:
 ---
 
 
+<div id="TOC">
+<ul>
+<li><a href="#you-can-do-that-in-r"><span class="toc-section-number">1</span> You can do that in R!</a></li>
+<li><a href="#returns"><span class="toc-section-number">2</span> Returns</a></li>
+<li><a href="#year-growth"><span class="toc-section-number">3</span> 10-year growth</a></li>
+<li><a href="#allocations"><span class="toc-section-number">4</span> Allocations</a></li>
+</ul>
+</div>
 
+<p>I recently started saving for retirement. I have a TSP account from military service, but there has been no contributions, or even a rebalance in 13 years. And now is a good time to get started. Don’t get me wrong, we have been building our savings as a family, but every so often they were depleted - moved across states and had a baby (he’s 9 now!), payed off credit card debt, closed on a house, that sort of thing.</p>
+<p>So, I opened a Roth IRA and a taxable investing account last month. Ever since, I’ve spent my evenings and workouts listening to podcasts and reading broadly about the topic. I’ve taken some key points that have guided my buys so far:</p>
+<ul>
+<li>I can’t beat the market, so low-cost <a href="https://investor.vanguard.com/etf/">ETFs</a> are great options.<br />
+</li>
+<li>I can invest in real estate by ivesting in <a href="https://www.investopedia.com/terms/r/reit.asp">REITs</a>.<br />
+</li>
+<li>Portfolios need diversified holdings, and a planned allocation for them. I plan to somewhat align with <a href="https://www.npr.org/2018/12/12/676158680/your-cheat-sheet-for-smarter-investing">David Swensen’s</a> recommended allocation by the end of the year.</li>
+</ul>
+<p>{{% alert note %}}
+<strong>Note:</strong> Please don’t take any of this as financial advise. This is simply what I’ve done for myself.
+{{% /alert %}}</p>
+<div id="you-can-do-that-in-r" class="section level1">
+<h1><span class="header-section-number">1</span> You can do that in R!</h1>
+<p>Being an R user, I figured I could analyze my portfolio using R. I came across the <a href="https://business-science.github.io/tidyquant/"><code>tidyquant</code></a> package, which integrates several financial analysis packages into the <code>tidyverse</code> framework.</p>
 <pre class="r"><code>library(tidyverse)
 library(tidyquant)
 library(patchwork)</code></pre>
-<p>These are my value allocations based on share closing prices on 5/13/2020, which will be used as weights for the portfolio analysis.</p>
+<p>These are my holdings and their proportional value allocations based on share closing prices on 5/13/2020. These will be used as weights for the portfolio analysis.</p>
 <pre class="r"><code>weights &lt;- tribble(
   ~acct, ~symbol, ~prop,
   &quot;combined&quot;, &quot;BND&quot;, 0.090,
@@ -39,6 +63,102 @@ library(patchwork)</code></pre>
   &quot;ind&quot;, &quot;EPR&quot;, 0.605,
   &quot;ind&quot;, &quot;VTR&quot;, 0.395
 )</code></pre>
+</div>
+<div id="returns" class="section level1">
+<h1><span class="header-section-number">2</span> Returns</h1>
+<p><code>tidyquant</code> accesses a multitute of web-based financial data and makes it available in <code>tidy</code> format.</p>
+<pre class="r"><code>tq_get(unique(weights$symbol),  
+       get = &quot;stock.prices&quot;,
+       from = &quot;2020-05-13&quot;,
+       to = &quot;2020-05-14&quot;) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">symbol</th>
+<th align="left">date</th>
+<th align="right">open</th>
+<th align="right">high</th>
+<th align="right">low</th>
+<th align="right">close</th>
+<th align="right">volume</th>
+<th align="right">adjusted</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">BND</td>
+<td align="left">2020-05-13</td>
+<td align="right">87.14</td>
+<td align="right">87.19</td>
+<td align="right">87.01</td>
+<td align="right">87.06</td>
+<td align="right">2628900</td>
+<td align="right">87.06</td>
+</tr>
+<tr class="even">
+<td align="left">DLR</td>
+<td align="left">2020-05-13</td>
+<td align="right">132.70</td>
+<td align="right">136.82</td>
+<td align="right">131.25</td>
+<td align="right">133.42</td>
+<td align="right">2474700</td>
+<td align="right">133.42</td>
+</tr>
+<tr class="odd">
+<td align="left">EPR</td>
+<td align="left">2020-05-13</td>
+<td align="right">24.86</td>
+<td align="right">25.40</td>
+<td align="right">23.85</td>
+<td align="right">23.85</td>
+<td align="right">3682900</td>
+<td align="right">23.85</td>
+</tr>
+<tr class="even">
+<td align="left">VNQ</td>
+<td align="left">2020-05-13</td>
+<td align="right">70.03</td>
+<td align="right">70.36</td>
+<td align="right">68.51</td>
+<td align="right">68.83</td>
+<td align="right">8358600</td>
+<td align="right">68.83</td>
+</tr>
+<tr class="odd">
+<td align="left">VTI</td>
+<td align="left">2020-05-13</td>
+<td align="right">143.90</td>
+<td align="right">144.31</td>
+<td align="right">140.02</td>
+<td align="right">141.45</td>
+<td align="right">5862100</td>
+<td align="right">141.45</td>
+</tr>
+<tr class="even">
+<td align="left">VTR</td>
+<td align="left">2020-05-13</td>
+<td align="right">27.36</td>
+<td align="right">27.46</td>
+<td align="right">26.58</td>
+<td align="right">26.79</td>
+<td align="right">5042400</td>
+<td align="right">26.79</td>
+</tr>
+<tr class="odd">
+<td align="left">VXUS</td>
+<td align="left">2020-05-13</td>
+<td align="right">45.16</td>
+<td align="right">45.20</td>
+<td align="right">44.31</td>
+<td align="right">44.56</td>
+<td align="right">5100600</td>
+<td align="right">44.56</td>
+</tr>
+</tbody>
+</table>
+<p>Here we’ll take a look at total monthly returns for the past year:</p>
 <pre class="r"><code># set a start date for returns
 start_date &lt;- &quot;2019-01-01&quot;
 
@@ -55,9 +175,7 @@ returns_combined &lt;- tq_get(unique(weights$symbol),
 get_returns &lt;- function(return_df, weight_df, growth = FALSE){
   
   df &lt;- return_df
-  
   x &lt;- weight_df
-  
   # filter weights for correct acct
   wt &lt;- filter(weights, 
                acct == x) %&gt;% 
@@ -75,7 +193,14 @@ get_returns &lt;- function(return_df, weight_df, growth = FALSE){
 port_combined &lt;- returns_combined %&gt;% 
   get_returns(&quot;combined&quot;)
 
-port_ira &lt;- returns_combined %&gt;% 
+# plot reurns
+p_combine &lt;- plot_returns(returns_combined, port_combined) +
+  labs(subtitle = &quot;Combined portfolios&quot;)
+
+p_combine</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/returns-1.png" width="672" /></p>
+<p>Now, let’s do this for each portfolio, and also examine the investment growth.</p>
+<pre class="r"><code>port_ira &lt;- returns_combined %&gt;% 
   filter(!symbol %in%
            c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
   get_returns(&quot;ira&quot;)
@@ -94,15 +219,12 @@ growth_ira &lt;- returns_combined %&gt;%
 growth_ind &lt;- returns_combined %&gt;% 
   filter(symbol %in%
            c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
-  get_returns(&quot;ind&quot;, growth = TRUE)</code></pre>
-<pre class="r"><code>source(&quot;plot-functions.R&quot;)
+  get_returns(&quot;ind&quot;, growth = TRUE)
 
-p_combine &lt;- plot_returns(returns_combined, port_combined) +
-  labs(subtitle = &quot;Combined portfolios&quot;)
+#-- plots 
+# code: https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/plot-functions.R&quot;
 
-p_combine</code></pre>
-<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-01-1.png" width="672" /></p>
-<pre class="r"><code># returns plots
+# returns plots
 p_ira &lt;- returns_combined %&gt;% 
   filter(!symbol %in%
            c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
@@ -125,13 +247,15 @@ grow_ind &lt;- plot_growth(growth_ind) +
 # patchwork
 p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-portfolios-1.png" width="1152" /></p>
-<pre class="r"><code>start_date &lt;- &quot;2010-01-01&quot;
-
-source(&quot;run-performance.R&quot;)
-
-p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
+<p>Having different types of assets helps reduce volatility. The taxable portfolio, which only holds two REITs has been the hardest hit by the current market trends. These REITs however, have historical high returns and are expected to bounce back.</p>
+</div>
+<div id="year-growth" class="section level1">
+<h1><span class="header-section-number">3</span> 10-year growth</h1>
+<p>No let’s look at historical returns for the past ten years.</p>
+<pre class="r"><code>start_date &lt;- &quot;2010-01-01&quot;</code></pre>
+<p>These portfolios increased 300% in value over ten years. Keeping holdings and allocations the same, $10K put in the IRA account back in 2010, would now be worth $30K.</p>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-10yr-portfolios-1.png" width="1152" /></p>
-<p>Additionally, xxx,….xx…. dividends for the past 10 years…</p>
+<p>Additionally, dividend distributions can be reinvested without additional capital. DLR has consistently increased their payouts over time, and VTI has increased in general, but it has a clear peaks-and-valleys pattern.</p>
 <pre class="r"><code># instead of sourcing the function
 # you can download the dev version of tidyquant
 source(&quot;https://raw.githubusercontent.com/business-science/tidyquant/master/R/tq_get.R&quot;)
@@ -165,15 +289,21 @@ dividends %&gt;%
   theme(panel.grid.minor = element_blank())</code></pre>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-div-hx-1.png" width="960" /></p>
 <p>Of course, I just started this journey last month - so I’m currently seeing losses.</p>
-<pre class="r"><code>start_date &lt;- &quot;2020-04-01&quot;
-
-source(&quot;run-performance.R&quot;)
-
-p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-my-portfolios-1.png" width="1152" /></p>
-<div id="allocations" class="section level2">
-<h2>Allocations</h2>
-<p>Here I’ll assign asset class and sector category to my current holdings to get an overview of the …… my current allocations,</p>
+<p>However, it makes more sense to look at daily returns for such a short period of time.</p>
+<pre class="r"><code># daily returns
+returns_combined &lt;- tq_get(unique(weights$symbol),  
+                           get = &quot;stock.prices&quot;,
+                           from = start_date) %&gt;% 
+  group_by(symbol) %&gt;%
+  tq_transmute(adjusted, periodReturn, 
+               period = &quot;daily&quot;,  #&lt;&lt;
+               col_rename = &quot;Ra&quot;)</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-daily-1.png" width="1152" /></p>
+</div>
+<div id="allocations" class="section level1">
+<h1><span class="header-section-number">4</span> Allocations</h1>
+<p>By assigning asset class and sector category to my current holdings, I can get an overview of my current allocations by type of securities I’m holding.</p>
 <pre class="r"><code>allocations &lt;- weights %&gt;% 
   filter(acct != &quot;combined&quot;) %&gt;% 
   mutate(acct = ifelse(acct == &quot;ind&quot;, 
@@ -193,6 +323,8 @@ p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
            symbol == &quot;VNQ&quot; ~ &quot;Real Estate&quot;
          ))
 
+# donut chart ref: 
+# https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/
 allocations %&gt;% 
   group_by(acct) %&gt;% 
   arrange(desc(asset_class)) %&gt;% 
@@ -215,17 +347,12 @@ allocations %&gt;%
   gameofthrones::scale_fill_got_d() +  
   theme_void(base_family = &quot;serif&quot;,
              base_size = 14) +
-  theme(legend.position = &quot;bottom&quot;) +
+  theme(legend.position = &quot;bottom&quot;,
+        legend.title = element_blank()) +
   xlim(0.5, 2.5) +
   facet_wrap(~acct)</code></pre>
-<div class="figure"><span id="fig:allocations"></span>
-<img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/allocations-1.png" alt="donut chart ref: https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/" width="672" />
-<p class="caption">
-Figure 1: donut chart ref: <a href="https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/" class="uri">https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/</a>
-</p>
-</div>
-<p>we can simply rebalance a portfolio to see what it’s performance could be.</p>
-<p>I’ve been really interested in holding VHT, and increasing my position in BND and VTI… You should use the actual values of your holdsings, but for simplicity, I’ll multiply my current allocations by $1,000 - and add to that.</p>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/allocations-1.png" width="672" /></p>
+<p>Currently, I’m heavy on real estate, but as the year progresses this should start to rebalance. Let’s say I have $500 to buy shares next month; as a priority, I’m interested in purchasing VHT, and increasing my position in BND and VTI. In this example, I’ll multiply my current allocations by $1,000 for simplicity. But you should use the actual values of your holdings - and add to that.</p>
 <pre class="r"><code># rebalance portfolio
 rebalance &lt;- allocations %&gt;% 
   add_row(acct = &quot;Taxable&quot;, symbol = &quot;VHT&quot;, prop = 0,
@@ -241,20 +368,103 @@ rebalance &lt;- allocations %&gt;%
   mutate(rebalance = new / sum(new)) %&gt;% 
   ungroup()
 
-rebalance</code></pre>
-<pre><code>## # A tibble: 8 x 8
-##   acct     symbol  prop asset_class sector          current   new rebalance
-##   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;             &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
-## 1 Roth IRA BND    0.14  Bond ETF    US Bond market      140   265    0.212 
-## 2 Roth IRA DLR    0.289 Equity REIT Data Center         289   289    0.231 
-## 3 Roth IRA VNQ    0.314 Stock ETF   Real Estate         314   314    0.251 
-## 4 Roth IRA VTI    0.185 Stock ETF   US Total market     185   310    0.248 
-## 5 Roth IRA VXUS   0.072 Stock ETF   Int&#39;l market         72    72    0.0576
-## 6 Taxable  EPR    0.605 Equity REIT Experiential        605   605    0.504 
-## 7 Taxable  VTR    0.395 Equity REIT Healthcare          395   395    0.329 
-## 8 Taxable  VHT    0     Stock ETF   Healthcare            0   200    0.167</code></pre>
-<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>My returns … blah ablaha</p>
-<pre class="r"><code>start_date &lt;- &quot;2020-04-01&quot;</code></pre>
-<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+rebalance %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">acct</th>
+<th align="left">symbol</th>
+<th align="right">prop</th>
+<th align="left">asset_class</th>
+<th align="left">sector</th>
+<th align="right">current</th>
+<th align="right">new</th>
+<th align="right">rebalance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Roth IRA</td>
+<td align="left">BND</td>
+<td align="right">0.140</td>
+<td align="left">Bond ETF</td>
+<td align="left">US Bond market</td>
+<td align="right">140</td>
+<td align="right">265</td>
+<td align="right">0.2120000</td>
+</tr>
+<tr class="even">
+<td align="left">Roth IRA</td>
+<td align="left">DLR</td>
+<td align="right">0.289</td>
+<td align="left">Equity REIT</td>
+<td align="left">Data Center</td>
+<td align="right">289</td>
+<td align="right">289</td>
+<td align="right">0.2312000</td>
+</tr>
+<tr class="odd">
+<td align="left">Roth IRA</td>
+<td align="left">VNQ</td>
+<td align="right">0.314</td>
+<td align="left">Stock ETF</td>
+<td align="left">Real Estate</td>
+<td align="right">314</td>
+<td align="right">314</td>
+<td align="right">0.2512000</td>
+</tr>
+<tr class="even">
+<td align="left">Roth IRA</td>
+<td align="left">VTI</td>
+<td align="right">0.185</td>
+<td align="left">Stock ETF</td>
+<td align="left">US Total market</td>
+<td align="right">185</td>
+<td align="right">310</td>
+<td align="right">0.2480000</td>
+</tr>
+<tr class="odd">
+<td align="left">Roth IRA</td>
+<td align="left">VXUS</td>
+<td align="right">0.072</td>
+<td align="left">Stock ETF</td>
+<td align="left">Int’l market</td>
+<td align="right">72</td>
+<td align="right">72</td>
+<td align="right">0.0576000</td>
+</tr>
+<tr class="even">
+<td align="left">Taxable</td>
+<td align="left">EPR</td>
+<td align="right">0.605</td>
+<td align="left">Equity REIT</td>
+<td align="left">Experiential</td>
+<td align="right">605</td>
+<td align="right">605</td>
+<td align="right">0.5041667</td>
+</tr>
+<tr class="odd">
+<td align="left">Taxable</td>
+<td align="left">VTR</td>
+<td align="right">0.395</td>
+<td align="left">Equity REIT</td>
+<td align="left">Healthcare</td>
+<td align="right">395</td>
+<td align="right">395</td>
+<td align="right">0.3291667</td>
+</tr>
+<tr class="even">
+<td align="left">Taxable</td>
+<td align="left">VHT</td>
+<td align="right">0.000</td>
+<td align="left">Stock ETF</td>
+<td align="left">Healthcare</td>
+<td align="right">0</td>
+<td align="right">200</td>
+<td align="right">0.1666667</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>

@@ -1,3 +1,5 @@
+library(ggplot2)
+
 # plot theme
 theme_set(
   theme_minimal(base_size = 12,
@@ -13,10 +15,10 @@ plot_returns <- function(returns, portfolio){
     geom_line(aes(color = symbol,
                   group = symbol),
               size = 1,
-              alpha = .8) +
+              alpha = .7) +
     geom_line(data = portfolio,
               aes(date, returns),
-              size = 2, lty = "dashed") +
+              size = 1.5) +
     labs(x = NULL, y = "Returns",
          color = NULL) +
     guides(color = guide_legend(

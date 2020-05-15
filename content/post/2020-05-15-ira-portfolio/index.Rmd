@@ -7,7 +7,8 @@ image:
   focal_point: 'center'
 output:
   blogdown::html_page:
-    toc: false
+    toc: true
+    number_sections: yes
     toc_depth: 1
 url_code: "https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/index.Rmd"
 links:
@@ -23,8 +24,26 @@ knitr::opts_chunk$set(
 	warning = FALSE
 )
 
+source("plot-functions.R")
+
 ```
 
+I recently started saving for retirement. I have a TSP account from military service, but there has been no contributions, or even a rebalance in 13 years. And now is a good time to get started. Don't get me wrong, we have been building our savings as a family, but every so often they were depleted - moved across states and had a baby (he's 9 now!), payed off credit card debt, closed on a house, that sort of thing.  
+
+So, I opened a Roth IRA and a taxable investing account last month.  Ever since, I've spent my evenings and workouts listening to podcasts and reading broadly about the topic.  I've taken some key points that have guided my buys so far:  
+
+* I can't beat the market, so low-cost [ETFs](https://investor.vanguard.com/etf/) are great options.  
+* I can invest in real estate by ivesting in [REITs](https://www.investopedia.com/terms/r/reit.asp).  
+* Portfolios need diversified holdings, and a planned allocation for them. I plan to somewhat align with [David Swensen's](https://www.npr.org/2018/12/12/676158680/your-cheat-sheet-for-smarter-investing) recommended allocation by the end of the year.  
+
+
+{{% alert note %}}
+**Note:** Please don't take any of this as financial advise. This is simply what I've done for myself.
+{{% /alert %}}
+
+# You can do that in R!
+
+Being an R user, I figured I could analyze my portfolio using R.  I came across the  [`tidyquant`](https://business-science.github.io/tidyquant/) package, which integrates several financial analysis packages into the `tidyverse` framework.
 
 ```{r libs}
 library(tidyverse)
@@ -33,7 +52,7 @@ library(patchwork)
 
 ```
 
-These are my value allocations based on share closing prices on 5/13/2020, which will be used as weights for the portfolio analysis.
+These are my holdings and their proportional value allocations based on share closing prices on 5/13/2020.  These will be used as weights for the portfolio analysis.
 
 ```{r}
 
@@ -57,8 +76,23 @@ weights <- tribble(
 
 ```
 
+# Returns
+
+`tidyquant` accesses a multitute of web-based financial data and makes it available in `tidy` format. 
+
+```{r}
+tq_get(unique(weights$symbol),  
+       get = "stock.prices",
+       from = "2020-05-13",
+       to = "2020-05-14") %>% 
+  knitr::kable()
+```
+
+
+Here we'll take a look at total monthly returns for the past year:
 
 ```{r returns}
+
 # set a start date for returns
 start_date <- "2019-01-01"
 
@@ -75,9 +109,7 @@ returns_combined <- tq_get(unique(weights$symbol),
 get_returns <- function(return_df, weight_df, growth = FALSE){
   
   df <- return_df
-  
   x <- weight_df
-  
   # filter weights for correct acct
   wt <- filter(weights, 
                acct == x) %>% 
@@ -95,6 +127,18 @@ get_returns <- function(return_df, weight_df, growth = FALSE){
 port_combined <- returns_combined %>% 
   get_returns("combined")
 
+# plot reurns
+p_combine <- plot_returns(returns_combined, port_combined) +
+  labs(subtitle = "Combined portfolios")
+
+p_combine
+
+
+```
+
+Now, let's do this for each portfolio, and also examine the investment growth.
+
+```{r plot-portfolios, fig.height=11, fig.width=12}
 port_ira <- returns_combined %>% 
   filter(!symbol %in%
            c("EPR", "VTR")) %>% 
@@ -116,21 +160,9 @@ growth_ind <- returns_combined %>%
            c("EPR", "VTR")) %>% 
   get_returns("ind", growth = TRUE)
 
-```
+#-- plots 
+# code: https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/plot-functions.R"
 
-
-```{r plot-01}
-source("plot-functions.R")
-
-p_combine <- plot_returns(returns_combined, port_combined) +
-  labs(subtitle = "Combined portfolios")
-
-p_combine
-
-```
-
-
-```{r plot-portfolios, fig.height=11, fig.width=12}
 # returns plots
 p_ira <- returns_combined %>% 
   filter(!symbol %in%
@@ -154,13 +186,30 @@ grow_ind <- plot_growth(growth_ind) +
 # patchwork
 p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
 
-
 ```
 
+Having different types of assets helps reduce volatility.  The taxable portfolio, which only holds two REITs has been the hardest hit by the current market trends. These REITs however, have historical high returns and are expected to bounce back.
 
-```{r plot-10yr-portfolios, fig.height=11, fig.width=12}
+# 10-year growth 
 
+No let's look at historical returns for the past ten years.
+
+```{r}
 start_date <- "2010-01-01"
+```
+
+These portfolios increased 300% in value over ten years. Keeping holdings and allocations the same, \$10K put in the IRA account back in 2010, would now be worth \$30K.
+
+
+```{r plot-10yr-portfolios, echo = FALSE, fig.height=11, fig.width=12}
+# monthly returns for individual securities
+returns_combined <- tq_get(unique(weights$symbol),  
+                           get = "stock.prices",
+                           from = start_date) %>% 
+  group_by(symbol) %>%
+  tq_transmute(adjusted, periodReturn, 
+               period = "monthly",
+               col_rename = "Ra")
 
 source("run-performance.R")
 
@@ -168,7 +217,7 @@ p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
 
 ```
 
-Additionally, xxx,....xx....  dividends for the past 10 years...
+Additionally, dividend distributions can be reinvested without additional capital. DLR has consistently increased their payouts over time, and VTI has increased in general, but it has a clear peaks-and-valleys pattern.  
 
 ```{r plot-div-hx, fig.width=10}
 # instead of sourcing the function
@@ -205,21 +254,63 @@ dividends %>%
 
 ```
 
-
 Of course, I just started this journey last month - so I'm currently seeing losses.
 
-```{r plot-my-portfolios, fig.height=11, fig.width=12}
+```{r plot-my-portfolios, fig.height=11, fig.width=12, echo = FALSE}
 start_date <- "2020-04-01"
+
+# monthly returns for individual securities
+returns_combined <- tq_get(unique(weights$symbol),  
+                           get = "stock.prices",
+                           from = start_date) %>% 
+  group_by(symbol) %>%
+  tq_transmute(adjusted, periodReturn, 
+               period = "monthly",
+               col_rename = "Ra")
 
 source("run-performance.R")
 
-p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
+p_combine / (p_ira +  p_ind)
 
 ```
 
-## Allocations
+However, it makes more sense to look at daily returns for such a short period of time.
 
-Here I'll assign asset class and sector category to my current holdings to get an overview of the ...... my current allocations,
+```{r, eval = FALSE}
+# daily returns
+returns_combined <- tq_get(unique(weights$symbol),  
+                           get = "stock.prices",
+                           from = start_date) %>% 
+  group_by(symbol) %>%
+  tq_transmute(adjusted, periodReturn, 
+               period = "daily",  #<<
+               col_rename = "Ra")
+
+```
+
+
+```{r plot-daily, echo = FALSE, fig.height=11, fig.width=12}
+start_date <- "2020-04-01"
+
+# monthly returns for individual securities
+returns_combined <- tq_get(unique(weights$symbol),  
+                           get = "stock.prices",
+                           from = start_date) %>% 
+  group_by(symbol) %>%
+  tq_transmute(adjusted, periodReturn, 
+               period = "daily",
+               col_rename = "Ra")
+
+source("run-performance.R")
+
+p_combine / (p_ira +  p_ind)
+
+```
+
+
+# Allocations
+
+By assigning asset class and sector category to my current holdings, I can get an overview of my current allocations by type of securities I'm holding. 
 
 ```{r allocations}
 
@@ -266,15 +357,15 @@ allocations %>%
   gameofthrones::scale_fill_got_d() +  
   theme_void(base_family = "serif",
              base_size = 14) +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank()) +
   xlim(0.5, 2.5) +
   facet_wrap(~acct)
 
 ```
 
-we can simply rebalance a portfolio to see what it's performance could be.  
+Currently, I'm heavy on real estate, but as the year progresses this should start to rebalance. Let's say I have \$500 to buy shares next month; as a priority, I'm interested in purchasing VHT, and increasing my position in BND and VTI. In this example, I'll multiply my current allocations by \$1,000 for simplicity. But you should use the actual values of your holdings - and add to that.
 
-I've been really interested in holding VHT, and increasing my position in BND and VTI... You should use the actual values of your holdsings, but for simplicity, I'll multiply my current allocations by $1,000 - and add to that.
 
 ```{r rebalance}
 # rebalance portfolio
@@ -292,7 +383,8 @@ rebalance <- allocations %>%
   mutate(rebalance = new / sum(new)) %>% 
   ungroup()
 
-rebalance
+rebalance %>% 
+  knitr::kable()
 
 ```
 
@@ -320,70 +412,10 @@ rebalance %>%
   gameofthrones::scale_fill_got_d() +  
   theme_void(base_family = "serif",
              base_size = 14) +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank()) +
   xlim(0.5, 2.5) +
   facet_wrap(~acct)
-
-```
-
-My returns ... blah ablaha 
-
-```{r}
-start_date <- "2020-04-01"
-```
-
-```{r, echo=FALSE}
-
-rebalance <- allocations %>% 
-  add_row(acct = "Taxable", symbol = "VHT", prop = 0,
-          asset_class = "Stock ETF", sector = "Healthcare") %>% 
-  mutate(prop = case_when(
-           symbol == "BND" ~ .20,
-           symbol == "VTI" ~ .40,
-           symbol == "DLR" ~ .15,
-           symbol == "VNQ" ~ .20,
-           symbol == "VXUS" ~ .05,
-           symbol == "EPR" ~ .50,
-           symbol == "VHT" ~ .50,
-         ))
-
-new_returns <- tq_get(unique(rebalance$symbol),  
-                      get = "stock.prices",
-                      from = start_date) %>% 
-  group_by(symbol) %>%
-  tq_transmute(adjusted, periodReturn, 
-               period = "monthly",
-               col_rename = "Ra")
-
-weights <- rebalance %>% select(acct, symbol, prop)
-
-port_ira <- new_returns %>% 
-  filter(!symbol %in%
-           c("EPR", "VTR", "VHT")) %>% 
-  get_returns("Roth IRA")
-
-port_ind <- new_returns %>% 
-  filter(symbol %in%
-           c("EPR", "VTR", "VHT")) %>% 
-  get_returns("Taxable")
-
-
-
-p_ira <- new_returns %>% 
-  filter(!symbol %in%
-           c("EPR", "VTR", "VHT")) %>% 
-  plot_returns(port_ira) +
-  labs(subtitle = "Roth IRA acct.")
-
-p_ind <- new_returns %>% 
-  filter(symbol %in%
-           c("EPR", "VTR", "VHT")) %>% 
-  plot_returns(port_ind) +
-  labs(subtitle = "Indv. taxable acct.")
-
-
-(p_ira +  p_ind) 
-
 
 ```
 
