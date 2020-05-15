@@ -1,0 +1,389 @@
+---
+title: "Making sense of investing for retirement"
+date: "2020-05-15"
+summary:
+image:
+  caption: Image by [NeONBRAND](https://unsplash.com/photos/JW6r_0CPYec)
+  focal_point: 'center'
+output:
+  blogdown::html_page:
+    toc: false
+    toc_depth: 1
+url_code: "https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/index.Rmd"
+links:
+tags: [R, data viz]
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+
+```
+
+
+```{r libs}
+library(tidyverse)
+library(tidyquant)
+library(patchwork)
+
+```
+
+These are my value allocations based on share closing prices on 5/13/2020, which will be used as weights for the portfolio analysis.
+
+```{r}
+
+weights <- tribble(
+  ~acct, ~symbol, ~prop,
+  "combined", "BND", 0.090,
+  "combined", "DLR", 0.186,
+  "combined", "EPR", 0.216,
+  "combined", "VNQ", 0.202,
+  "combined", "VTI", 0.119,
+  "combined", "VTR", 0.141,
+  "combined", "VXUS", 0.046,
+  "ira", "BND", 0.140,
+  "ira", "DLR", 0.289,
+  "ira", "VNQ", 0.314,
+  "ira", "VTI", 0.185,
+  "ira", "VXUS", 0.072,
+  "ind", "EPR", 0.605,
+  "ind", "VTR", 0.395
+)
+
+```
+
+
+```{r returns}
+# set a start date for returns
+start_date <- "2019-01-01"
+
+# monthly returns for individual securities
+returns_combined <- tq_get(unique(weights$symbol),  
+                           get = "stock.prices",
+                           from = start_date) %>% 
+  group_by(symbol) %>%
+  tq_transmute(adjusted, periodReturn, 
+               period = "monthly",
+               col_rename = "Ra")
+
+# portfolio returns
+get_returns <- function(return_df, weight_df, growth = FALSE){
+  
+  df <- return_df
+  
+  x <- weight_df
+  
+  # filter weights for correct acct
+  wt <- filter(weights, 
+               acct == x) %>% 
+    select(-acct)
+  
+  tq_portfolio(df,
+               assets_col = symbol,
+               returns_col = Ra,
+               weights = wt,
+               col_rename = "returns",
+               wealth.index = growth)
+}
+  
+
+port_combined <- returns_combined %>% 
+  get_returns("combined")
+
+port_ira <- returns_combined %>% 
+  filter(!symbol %in%
+           c("EPR", "VTR")) %>% 
+  get_returns("ira")
+
+port_ind <- returns_combined %>% 
+  filter(symbol %in%
+           c("EPR", "VTR")) %>% 
+  get_returns("ind")
+
+# track growth
+growth_ira <- returns_combined %>% 
+  filter(!symbol %in%
+           c("EPR", "VTR")) %>% 
+  get_returns("ira", growth = TRUE)
+
+growth_ind <- returns_combined %>% 
+  filter(symbol %in%
+           c("EPR", "VTR")) %>% 
+  get_returns("ind", growth = TRUE)
+
+```
+
+
+```{r plot-01}
+source("plot-functions.R")
+
+p_combine <- plot_returns(returns_combined, port_combined) +
+  labs(subtitle = "Combined portfolios")
+
+p_combine
+
+```
+
+
+```{r plot-portfolios, fig.height=11, fig.width=12}
+# returns plots
+p_ira <- returns_combined %>% 
+  filter(!symbol %in%
+           c("EPR", "VTR")) %>% 
+  plot_returns(port_ira) +
+  labs(subtitle = "Roth IRA acct.")
+
+p_ind <- returns_combined %>% 
+  filter(symbol %in%
+           c("EPR", "VTR")) %>% 
+  plot_returns(port_ind) +
+  labs(subtitle = "Indv. taxable acct.")
+
+# growth plots
+grow_ira <- plot_growth(growth_ira) +
+  labs(subtitle = "Roth IRA acct. growth of $1")
+
+grow_ind <- plot_growth(growth_ind) +
+  labs(subtitle = "Indv. taxable acct. growth of $1")
+
+# patchwork
+p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
+
+
+```
+
+
+```{r plot-10yr-portfolios, fig.height=11, fig.width=12}
+
+start_date <- "2010-01-01"
+
+source("run-performance.R")
+
+p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
+
+```
+
+Additionally, xxx,....xx....  dividends for the past 10 years...
+
+```{r plot-div-hx, fig.width=10}
+# instead of sourcing the function
+# you can download the dev version of tidyquant
+source("https://raw.githubusercontent.com/business-science/tidyquant/master/R/tq_get.R")
+
+# plot dividends timeseries
+stocks <- unique(weights$symbol)
+
+dividends <- tq_get(stocks, 
+                    get = "dividends",
+                    from = start_date) %>% 
+  mutate(acct = ifelse(
+    symbol %in% c("EPR", "VTR"), 
+    "Taxable", "Roth IRA"
+  ))
+
+dividends %>% 
+  ggplot(aes(date, value)) +
+  geom_line(aes(group = symbol),
+            size = 1, color = "#f5ed93") +
+  geom_line(data = . %>% 
+              filter(symbol %in% c("VTI", "DLR")),
+            aes(date, value, color = symbol)) +
+  scale_x_date(breaks = scales::pretty_breaks(12)) +
+  scale_y_continuous(labels = scales::dollar) +
+  scale_color_manual(values = 
+                       c("DLR" = "#003F4C",
+                         "VTI" = "#601200")) +
+  facet_wrap(~acct) +
+  labs(x = NULL, color = NULL,
+       y = "Dividends payout (per share)") +
+  theme(panel.grid.minor = element_blank())
+
+```
+
+
+Of course, I just started this journey last month - so I'm currently seeing losses.
+
+```{r plot-my-portfolios, fig.height=11, fig.width=12}
+start_date <- "2020-04-01"
+
+source("run-performance.R")
+
+p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
+
+```
+
+## Allocations
+
+Here I'll assign asset class and sector category to my current holdings to get an overview of the ...... my current allocations,
+
+```{r allocations}
+
+allocations <- weights %>% 
+  filter(acct != "combined") %>% 
+  mutate(acct = ifelse(acct == "ind", 
+                       "Taxable", "Roth IRA"),
+         asset_class = case_when(
+           symbol %in% c("VTR", "EPR", "DLR") ~ "Equity REIT",
+           symbol %in% c("VTI",  "VXUS", "VNQ") ~ "Stock ETF",
+           symbol == "BND" ~ "Bond ETF"
+         ),
+         sector = case_when(
+           symbol == "VTR" ~ "Healthcare",
+           symbol == "EPR" ~ "Experiential",
+           symbol == "BND" ~ "US Bond market",
+           symbol == "VTI" ~ "US Total market",
+           symbol == "VXUS" ~ "Int'l market",
+           symbol == "DLR" ~ "Data Center",
+           symbol == "VNQ" ~ "Real Estate"
+         ))
+
+# donut chart ref: 
+# https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/
+allocations %>% 
+  group_by(acct) %>% 
+  arrange(desc(asset_class)) %>% 
+  mutate(lab.ypos = cumsum(prop) - 0.5*prop) %>%
+  ggplot(aes(x = 2, y = prop, 
+             fill = asset_class)) +
+  geom_bar(width = 1, 
+           stat = "identity", color = "white") +
+  coord_polar(theta = "y", start = 0) +
+  geom_text(aes(y = lab.ypos, 
+                label = scales::percent(prop)), 
+            color = "white") +
+  ggrepel::geom_text_repel(aes(y = lab.ypos,
+                               label = sector),
+                           nudge_x = 1, vjust = 1, 
+                           direction = "both",
+                           min.segment.length = 2,
+                           segment.size  = 0.2,
+                           segment.colour = "Gray60") +
+  gameofthrones::scale_fill_got_d() +  
+  theme_void(base_family = "serif",
+             base_size = 14) +
+  theme(legend.position = "bottom") +
+  xlim(0.5, 2.5) +
+  facet_wrap(~acct)
+
+```
+
+we can simply rebalance a portfolio to see what it's performance could be.  
+
+I've been really interested in holding VHT, and increasing my position in BND and VTI... You should use the actual values of your holdsings, but for simplicity, I'll multiply my current allocations by $1,000 - and add to that.
+
+```{r rebalance}
+# rebalance portfolio
+rebalance <- allocations %>% 
+  add_row(acct = "Taxable", symbol = "VHT", prop = 0,
+          asset_class = "Stock ETF", sector = "Healthcare") %>% 
+  mutate(current = prop*1000,
+         new = case_when(
+           symbol == "BND" ~ current + 125,
+           symbol == "VTI" ~ current + 125,
+           symbol == "VHT" ~ current + 200,
+           TRUE ~ current + 0
+         )) %>% 
+  group_by(acct) %>% 
+  mutate(rebalance = new / sum(new)) %>% 
+  ungroup()
+
+rebalance
+
+```
+
+
+```{r, echo=FALSE}
+rebalance %>% 
+  group_by(acct) %>% 
+  arrange(desc(asset_class)) %>% 
+  mutate(lab.ypos = cumsum(rebalance) - 0.5*rebalance) %>%
+  ggplot(aes(x = 2, y = rebalance, 
+             fill = asset_class)) +
+  geom_bar(width = 1, 
+           stat = "identity", color = "white") +
+  coord_polar(theta = "y", start = 0) +
+  geom_text(aes(y = lab.ypos, 
+                label = scales::percent(rebalance)), 
+            color = "white") +
+  ggrepel::geom_text_repel(aes(y = lab.ypos,
+                               label = sector),
+                           nudge_x = 1, vjust = 1, 
+                           direction = "both",
+                           min.segment.length = 2,
+                           segment.size  = 0.2,
+                           segment.colour = "Gray60") +
+  gameofthrones::scale_fill_got_d() +  
+  theme_void(base_family = "serif",
+             base_size = 14) +
+  theme(legend.position = "bottom") +
+  xlim(0.5, 2.5) +
+  facet_wrap(~acct)
+
+```
+
+My returns ... blah ablaha 
+
+```{r}
+start_date <- "2020-04-01"
+```
+
+```{r, echo=FALSE}
+
+rebalance <- allocations %>% 
+  add_row(acct = "Taxable", symbol = "VHT", prop = 0,
+          asset_class = "Stock ETF", sector = "Healthcare") %>% 
+  mutate(prop = case_when(
+           symbol == "BND" ~ .20,
+           symbol == "VTI" ~ .40,
+           symbol == "DLR" ~ .15,
+           symbol == "VNQ" ~ .20,
+           symbol == "VXUS" ~ .05,
+           symbol == "EPR" ~ .50,
+           symbol == "VHT" ~ .50,
+         ))
+
+new_returns <- tq_get(unique(rebalance$symbol),  
+                      get = "stock.prices",
+                      from = start_date) %>% 
+  group_by(symbol) %>%
+  tq_transmute(adjusted, periodReturn, 
+               period = "monthly",
+               col_rename = "Ra")
+
+weights <- rebalance %>% select(acct, symbol, prop)
+
+port_ira <- new_returns %>% 
+  filter(!symbol %in%
+           c("EPR", "VTR", "VHT")) %>% 
+  get_returns("Roth IRA")
+
+port_ind <- new_returns %>% 
+  filter(symbol %in%
+           c("EPR", "VTR", "VHT")) %>% 
+  get_returns("Taxable")
+
+
+
+p_ira <- new_returns %>% 
+  filter(!symbol %in%
+           c("EPR", "VTR", "VHT")) %>% 
+  plot_returns(port_ira) +
+  labs(subtitle = "Roth IRA acct.")
+
+p_ind <- new_returns %>% 
+  filter(symbol %in%
+           c("EPR", "VTR", "VHT")) %>% 
+  plot_returns(port_ind) +
+  labs(subtitle = "Indv. taxable acct.")
+
+
+(p_ira +  p_ind) 
+
+
+```
+

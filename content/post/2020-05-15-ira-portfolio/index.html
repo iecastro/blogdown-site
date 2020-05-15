@@ -1,0 +1,260 @@
+---
+title: "Making sense of investing for retirement"
+date: "2020-05-15"
+summary:
+image:
+  caption: Image by [NeONBRAND](https://unsplash.com/photos/JW6r_0CPYec)
+  focal_point: 'center'
+output:
+  blogdown::html_page:
+    toc: false
+    toc_depth: 1
+url_code: "https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/index.Rmd"
+links:
+tags: [R, data viz]
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<pre class="r"><code>library(tidyverse)
+library(tidyquant)
+library(patchwork)</code></pre>
+<p>These are my value allocations based on share closing prices on 5/13/2020, which will be used as weights for the portfolio analysis.</p>
+<pre class="r"><code>weights &lt;- tribble(
+  ~acct, ~symbol, ~prop,
+  &quot;combined&quot;, &quot;BND&quot;, 0.090,
+  &quot;combined&quot;, &quot;DLR&quot;, 0.186,
+  &quot;combined&quot;, &quot;EPR&quot;, 0.216,
+  &quot;combined&quot;, &quot;VNQ&quot;, 0.202,
+  &quot;combined&quot;, &quot;VTI&quot;, 0.119,
+  &quot;combined&quot;, &quot;VTR&quot;, 0.141,
+  &quot;combined&quot;, &quot;VXUS&quot;, 0.046,
+  &quot;ira&quot;, &quot;BND&quot;, 0.140,
+  &quot;ira&quot;, &quot;DLR&quot;, 0.289,
+  &quot;ira&quot;, &quot;VNQ&quot;, 0.314,
+  &quot;ira&quot;, &quot;VTI&quot;, 0.185,
+  &quot;ira&quot;, &quot;VXUS&quot;, 0.072,
+  &quot;ind&quot;, &quot;EPR&quot;, 0.605,
+  &quot;ind&quot;, &quot;VTR&quot;, 0.395
+)</code></pre>
+<pre class="r"><code># set a start date for returns
+start_date &lt;- &quot;2019-01-01&quot;
+
+# monthly returns for individual securities
+returns_combined &lt;- tq_get(unique(weights$symbol),  
+                           get = &quot;stock.prices&quot;,
+                           from = start_date) %&gt;% 
+  group_by(symbol) %&gt;%
+  tq_transmute(adjusted, periodReturn, 
+               period = &quot;monthly&quot;,
+               col_rename = &quot;Ra&quot;)
+
+# portfolio returns
+get_returns &lt;- function(return_df, weight_df, growth = FALSE){
+  
+  df &lt;- return_df
+  
+  x &lt;- weight_df
+  
+  # filter weights for correct acct
+  wt &lt;- filter(weights, 
+               acct == x) %&gt;% 
+    select(-acct)
+  
+  tq_portfolio(df,
+               assets_col = symbol,
+               returns_col = Ra,
+               weights = wt,
+               col_rename = &quot;returns&quot;,
+               wealth.index = growth)
+}
+  
+
+port_combined &lt;- returns_combined %&gt;% 
+  get_returns(&quot;combined&quot;)
+
+port_ira &lt;- returns_combined %&gt;% 
+  filter(!symbol %in%
+           c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
+  get_returns(&quot;ira&quot;)
+
+port_ind &lt;- returns_combined %&gt;% 
+  filter(symbol %in%
+           c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
+  get_returns(&quot;ind&quot;)
+
+# track growth
+growth_ira &lt;- returns_combined %&gt;% 
+  filter(!symbol %in%
+           c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
+  get_returns(&quot;ira&quot;, growth = TRUE)
+
+growth_ind &lt;- returns_combined %&gt;% 
+  filter(symbol %in%
+           c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
+  get_returns(&quot;ind&quot;, growth = TRUE)</code></pre>
+<pre class="r"><code>source(&quot;plot-functions.R&quot;)
+
+p_combine &lt;- plot_returns(returns_combined, port_combined) +
+  labs(subtitle = &quot;Combined portfolios&quot;)
+
+p_combine</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-01-1.png" width="672" /></p>
+<pre class="r"><code># returns plots
+p_ira &lt;- returns_combined %&gt;% 
+  filter(!symbol %in%
+           c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
+  plot_returns(port_ira) +
+  labs(subtitle = &quot;Roth IRA acct.&quot;)
+
+p_ind &lt;- returns_combined %&gt;% 
+  filter(symbol %in%
+           c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
+  plot_returns(port_ind) +
+  labs(subtitle = &quot;Indv. taxable acct.&quot;)
+
+# growth plots
+grow_ira &lt;- plot_growth(growth_ira) +
+  labs(subtitle = &quot;Roth IRA acct. growth of $1&quot;)
+
+grow_ind &lt;- plot_growth(growth_ind) +
+  labs(subtitle = &quot;Indv. taxable acct. growth of $1&quot;)
+
+# patchwork
+p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-portfolios-1.png" width="1152" /></p>
+<pre class="r"><code>start_date &lt;- &quot;2010-01-01&quot;
+
+source(&quot;run-performance.R&quot;)
+
+p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-10yr-portfolios-1.png" width="1152" /></p>
+<p>Additionally, xxx,….xx…. dividends for the past 10 years…</p>
+<pre class="r"><code># instead of sourcing the function
+# you can download the dev version of tidyquant
+source(&quot;https://raw.githubusercontent.com/business-science/tidyquant/master/R/tq_get.R&quot;)
+
+# plot dividends timeseries
+stocks &lt;- unique(weights$symbol)
+
+dividends &lt;- tq_get(stocks, 
+                    get = &quot;dividends&quot;,
+                    from = start_date) %&gt;% 
+  mutate(acct = ifelse(
+    symbol %in% c(&quot;EPR&quot;, &quot;VTR&quot;), 
+    &quot;Taxable&quot;, &quot;Roth IRA&quot;
+  ))
+
+dividends %&gt;% 
+  ggplot(aes(date, value)) +
+  geom_line(aes(group = symbol),
+            size = 1, color = &quot;#f5ed93&quot;) +
+  geom_line(data = . %&gt;% 
+              filter(symbol %in% c(&quot;VTI&quot;, &quot;DLR&quot;)),
+            aes(date, value, color = symbol)) +
+  scale_x_date(breaks = scales::pretty_breaks(12)) +
+  scale_y_continuous(labels = scales::dollar) +
+  scale_color_manual(values = 
+                       c(&quot;DLR&quot; = &quot;#003F4C&quot;,
+                         &quot;VTI&quot; = &quot;#601200&quot;)) +
+  facet_wrap(~acct) +
+  labs(x = NULL, color = NULL,
+       y = &quot;Dividends payout (per share)&quot;) +
+  theme(panel.grid.minor = element_blank())</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-div-hx-1.png" width="960" /></p>
+<p>Of course, I just started this journey last month - so I’m currently seeing losses.</p>
+<pre class="r"><code>start_date &lt;- &quot;2020-04-01&quot;
+
+source(&quot;run-performance.R&quot;)
+
+p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-my-portfolios-1.png" width="1152" /></p>
+<div id="allocations" class="section level2">
+<h2>Allocations</h2>
+<p>Here I’ll assign asset class and sector category to my current holdings to get an overview of the …… my current allocations,</p>
+<pre class="r"><code>allocations &lt;- weights %&gt;% 
+  filter(acct != &quot;combined&quot;) %&gt;% 
+  mutate(acct = ifelse(acct == &quot;ind&quot;, 
+                       &quot;Taxable&quot;, &quot;Roth IRA&quot;),
+         asset_class = case_when(
+           symbol %in% c(&quot;VTR&quot;, &quot;EPR&quot;, &quot;DLR&quot;) ~ &quot;Equity REIT&quot;,
+           symbol %in% c(&quot;VTI&quot;,  &quot;VXUS&quot;, &quot;VNQ&quot;) ~ &quot;Stock ETF&quot;,
+           symbol == &quot;BND&quot; ~ &quot;Bond ETF&quot;
+         ),
+         sector = case_when(
+           symbol == &quot;VTR&quot; ~ &quot;Healthcare&quot;,
+           symbol == &quot;EPR&quot; ~ &quot;Experiential&quot;,
+           symbol == &quot;BND&quot; ~ &quot;US Bond market&quot;,
+           symbol == &quot;VTI&quot; ~ &quot;US Total market&quot;,
+           symbol == &quot;VXUS&quot; ~ &quot;Int&#39;l market&quot;,
+           symbol == &quot;DLR&quot; ~ &quot;Data Center&quot;,
+           symbol == &quot;VNQ&quot; ~ &quot;Real Estate&quot;
+         ))
+
+allocations %&gt;% 
+  group_by(acct) %&gt;% 
+  arrange(desc(asset_class)) %&gt;% 
+  mutate(lab.ypos = cumsum(prop) - 0.5*prop) %&gt;%
+  ggplot(aes(x = 2, y = prop, 
+             fill = asset_class)) +
+  geom_bar(width = 1, 
+           stat = &quot;identity&quot;, color = &quot;white&quot;) +
+  coord_polar(theta = &quot;y&quot;, start = 0) +
+  geom_text(aes(y = lab.ypos, 
+                label = scales::percent(prop)), 
+            color = &quot;white&quot;) +
+  ggrepel::geom_text_repel(aes(y = lab.ypos,
+                               label = sector),
+                           nudge_x = 1, vjust = 1, 
+                           direction = &quot;both&quot;,
+                           min.segment.length = 2,
+                           segment.size  = 0.2,
+                           segment.colour = &quot;Gray60&quot;) +
+  gameofthrones::scale_fill_got_d() +  
+  theme_void(base_family = &quot;serif&quot;,
+             base_size = 14) +
+  theme(legend.position = &quot;bottom&quot;) +
+  xlim(0.5, 2.5) +
+  facet_wrap(~acct)</code></pre>
+<div class="figure"><span id="fig:allocations"></span>
+<img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/allocations-1.png" alt="donut chart ref: https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/" width="672" />
+<p class="caption">
+Figure 1: donut chart ref: <a href="https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/" class="uri">https://www.datanovia.com/en/blog/how-to-create-a-pie-chart-in-r-using-ggplot2/</a>
+</p>
+</div>
+<p>we can simply rebalance a portfolio to see what it’s performance could be.</p>
+<p>I’ve been really interested in holding VHT, and increasing my position in BND and VTI… You should use the actual values of your holdsings, but for simplicity, I’ll multiply my current allocations by $1,000 - and add to that.</p>
+<pre class="r"><code># rebalance portfolio
+rebalance &lt;- allocations %&gt;% 
+  add_row(acct = &quot;Taxable&quot;, symbol = &quot;VHT&quot;, prop = 0,
+          asset_class = &quot;Stock ETF&quot;, sector = &quot;Healthcare&quot;) %&gt;% 
+  mutate(current = prop*1000,
+         new = case_when(
+           symbol == &quot;BND&quot; ~ current + 125,
+           symbol == &quot;VTI&quot; ~ current + 125,
+           symbol == &quot;VHT&quot; ~ current + 200,
+           TRUE ~ current + 0
+         )) %&gt;% 
+  group_by(acct) %&gt;% 
+  mutate(rebalance = new / sum(new)) %&gt;% 
+  ungroup()
+
+rebalance</code></pre>
+<pre><code>## # A tibble: 8 x 8
+##   acct     symbol  prop asset_class sector          current   new rebalance
+##   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;             &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Roth IRA BND    0.14  Bond ETF    US Bond market      140   265    0.212 
+## 2 Roth IRA DLR    0.289 Equity REIT Data Center         289   289    0.231 
+## 3 Roth IRA VNQ    0.314 Stock ETF   Real Estate         314   314    0.251 
+## 4 Roth IRA VTI    0.185 Stock ETF   US Total market     185   310    0.248 
+## 5 Roth IRA VXUS   0.072 Stock ETF   Int&#39;l market         72    72    0.0576
+## 6 Taxable  EPR    0.605 Equity REIT Experiential        605   605    0.504 
+## 7 Taxable  VTR    0.395 Equity REIT Healthcare          395   395    0.329 
+## 8 Taxable  VHT    0     Stock ETF   Healthcare            0   200    0.167</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>My returns … blah ablaha</p>
+<pre class="r"><code>start_date &lt;- &quot;2020-04-01&quot;</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
