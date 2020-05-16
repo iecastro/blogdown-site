@@ -1,7 +1,7 @@
 ---
-title: "Making sense of investing for retirement"
+title: "Making sense of investing and portfolio performance"
 date: "2020-05-15"
-summary:
+summary: One of the funny things about the stock market is that every time one person buys, another sells, and both think they are astute. -William Feather
 image:
   caption: Image by [NeONBRAND](https://unsplash.com/photos/JW6r_0CPYec)
   focal_point: 'center'
@@ -12,7 +12,7 @@ output:
     toc_depth: 1
 url_code: "https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/index.Rmd"
 links:
-tags: [R, data viz]
+tags: [R, data viz, tidyquant]
 editor_options: 
   chunk_output_type: console
 ---
@@ -22,21 +22,24 @@ editor_options:
 <ul>
 <li><a href="#you-can-do-that-in-r"><span class="toc-section-number">1</span> You can do that in R!</a></li>
 <li><a href="#returns"><span class="toc-section-number">2</span> Returns</a></li>
-<li><a href="#year-growth"><span class="toc-section-number">3</span> 10-year growth</a></li>
+<li><a href="#previous-10-year-growth"><span class="toc-section-number">3</span> Previous 10-year growth</a></li>
 <li><a href="#allocations"><span class="toc-section-number">4</span> Allocations</a></li>
+<li><a href="#explore-securities-before-buying"><span class="toc-section-number">5</span> Explore securities before buying</a></li>
+<li><a href="#compare-current-vs-planned-allocation"><span class="toc-section-number">6</span> Compare current vs planned allocation</a></li>
+<li><a href="#conclusions"><span class="toc-section-number">7</span> Conclusions</a></li>
 </ul>
 </div>
 
-<p>I recently started saving for retirement. I have a TSP account from military service, but there has been no contributions, or even a rebalance in 13 years. And now is a good time to get started. Don’t get me wrong, we have been building our savings as a family, but every so often they were depleted - moved across states and had a baby (he’s 9 now!), payed off credit card debt, closed on a house, that sort of thing.</p>
+<p>I recently started saving for retirement. I’ve had a TSP account from military service, but there has been no contributions, or even a rebalance in 13 years. And now is a good time to get started. Don’t get me wrong, we have been building our savings as a family, but every so often they were depleted - moved across states and had a baby (he’s 9 now!), payed off credit card debt, closed on a house, that sort of thing.</p>
 <p>So, I opened a Roth IRA and a taxable investing account last month. Ever since, I’ve spent my evenings and workouts listening to podcasts and reading broadly about the topic. I’ve taken some key points that have guided my buys so far:</p>
 <ul>
 <li>I can’t beat the market, so low-cost <a href="https://investor.vanguard.com/etf/">ETFs</a> are great options.<br />
 </li>
-<li>I can invest in real estate by ivesting in <a href="https://www.investopedia.com/terms/r/reit.asp">REITs</a>.<br />
+<li>I can invest in real estate by investing in <a href="https://www.investopedia.com/terms/r/reit.asp">REITs</a>.<br />
 </li>
 <li>Portfolios need diversified holdings, and a planned allocation for them. I plan to somewhat align with <a href="https://www.npr.org/2018/12/12/676158680/your-cheat-sheet-for-smarter-investing">David Swensen’s</a> recommended allocation by the end of the year.</li>
 </ul>
-<p>{{% alert note %}}
+<p>{{% alert warning %}}
 <strong>Note:</strong> Please don’t take any of this as financial advise. This is simply what I’ve done for myself.
 {{% /alert %}}</p>
 <div id="you-can-do-that-in-r" class="section level1">
@@ -193,13 +196,13 @@ get_returns &lt;- function(return_df, weight_df, growth = FALSE){
 port_combined &lt;- returns_combined %&gt;% 
   get_returns(&quot;combined&quot;)
 
-# plot reurns
+# plot returns
 p_combine &lt;- plot_returns(returns_combined, port_combined) +
   labs(subtitle = &quot;Combined portfolios&quot;)
 
 p_combine</code></pre>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/returns-1.png" width="672" /></p>
-<p>Now, let’s do this for each portfolio, and also examine the investment growth.</p>
+<p>Now, let’s do this for each portfolio, and also examine the investment growth of a dollar.</p>
 <pre class="r"><code>port_ira &lt;- returns_combined %&gt;% 
   filter(!symbol %in%
            c(&quot;EPR&quot;, &quot;VTR&quot;)) %&gt;% 
@@ -222,6 +225,8 @@ growth_ind &lt;- returns_combined %&gt;%
   get_returns(&quot;ind&quot;, growth = TRUE)
 
 #-- plots 
+# I wrote some plot functions and saved
+# them on a separate script 
 # code: https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/plot-functions.R&quot;
 
 # returns plots
@@ -247,16 +252,18 @@ grow_ind &lt;- plot_growth(growth_ind) +
 # patchwork
 p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)</code></pre>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-portfolios-1.png" width="1152" /></p>
-<p>Having different types of assets helps reduce volatility. The taxable portfolio, which only holds two REITs has been the hardest hit by the current market trends. These REITs however, have historical high returns and are expected to bounce back.</p>
+<p>Having different types of assets helps reduce volatility. The taxable portfolio, which only holds two REITs has been the hardest hit by the current market trends. These REITs however, have historical high returns and are expected to bounce back. As for growth, no big surprise here - a dollar invested last year is worth about the same today.</p>
 </div>
-<div id="year-growth" class="section level1">
-<h1><span class="header-section-number">3</span> 10-year growth</h1>
-<p>No let’s look at historical returns for the past ten years.</p>
+<div id="previous-10-year-growth" class="section level1">
+<h1><span class="header-section-number">3</span> Previous 10-year growth</h1>
+<p>💰 💰 💰</p>
+<p>Now let’s look at historical returns for the past ten years. For this we just need to update the <strong>start_date</strong> parameter and re-run the analysis.</p>
 <pre class="r"><code>start_date &lt;- &quot;2010-01-01&quot;</code></pre>
-<p>These portfolios increased 300% in value over ten years. Keeping holdings and allocations the same, $10K put in the IRA account back in 2010, would now be worth $30K.</p>
+<p>These portfolios would’ve increased 3x in value over ten years. Keeping holdings and allocations the same, a one-time deposit of $10K into the IRA account back in 2010, would now be worth $30K.</p>
+<p>If $10K had been deposited into each account, the combined worth today would be $40K; but also consider the combined worth back in December would have been $60K. Volatility.</p>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-10yr-portfolios-1.png" width="1152" /></p>
-<p>Additionally, dividend distributions can be reinvested without additional capital. DLR has consistently increased their payouts over time, and VTI has increased in general, but it has a clear peaks-and-valleys pattern.</p>
-<pre class="r"><code># instead of sourcing the function
+<p>Total returns account for dividend distributions, but it does not account for dividens re-invested. Reinvesting dividends adds to your position, by owning more shares, above any additional capital. Historically, DLR has consistently increased their payouts over time. VTI has increased as well, in general; but it has a clear pattern of peaks-and-valleys.</p>
+<pre class="r"><code># instead of sourcing this function
 # you can download the dev version of tidyquant
 source(&quot;https://raw.githubusercontent.com/business-science/tidyquant/master/R/tq_get.R&quot;)
 
@@ -291,19 +298,31 @@ dividends %&gt;%
 <p>Of course, I just started this journey last month - so I’m currently seeing losses.</p>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-my-portfolios-1.png" width="1152" /></p>
 <p>However, it makes more sense to look at daily returns for such a short period of time.</p>
-<pre class="r"><code># daily returns
+<pre class="r"><code>start_date &lt;- &quot;2020-04-01&quot;
+
+# daily returns
 returns_combined &lt;- tq_get(unique(weights$symbol),  
                            get = &quot;stock.prices&quot;,
                            from = start_date) %&gt;% 
   group_by(symbol) %&gt;%
   tq_transmute(adjusted, periodReturn, 
                period = &quot;daily&quot;,  #&lt;&lt;
-               col_rename = &quot;Ra&quot;)</code></pre>
+               col_rename = &quot;Ra&quot;)
+
+source(&quot;run-performance.R&quot;)
+
+# for later comparison
+asis_combined &lt;-  plot_returns(returns_combined, port_combined) +
+  labs(subtitle = &quot;Performance of current portfolio allocations&quot;) +
+  geom_hline(yintercept = -.05, lty = &quot;dashed&quot;) +
+  geom_hline(yintercept = .05, lty = &quot;dashed&quot;)
+
+p_combine / (p_ira +  p_ind)</code></pre>
 <p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/plot-daily-1.png" width="1152" /></p>
 </div>
 <div id="allocations" class="section level1">
 <h1><span class="header-section-number">4</span> Allocations</h1>
-<p>By assigning asset class and sector category to my current holdings, I can get an overview of my current allocations by type of securities I’m holding.</p>
+<p>By assigning asset class and sector categories to my current holdings, I can get an overview of my current allocations beyond individual securities.</p>
 <pre class="r"><code>allocations &lt;- weights %&gt;% 
   filter(acct != &quot;combined&quot;) %&gt;% 
   mutate(acct = ifelse(acct == &quot;ind&quot;, 
@@ -361,7 +380,7 @@ rebalance &lt;- allocations %&gt;%
          new = case_when(
            symbol == &quot;BND&quot; ~ current + 125,
            symbol == &quot;VTI&quot; ~ current + 125,
-           symbol == &quot;VHT&quot; ~ current + 200,
+           symbol == &quot;VHT&quot; ~ current + 250,
            TRUE ~ current + 0
          )) %&gt;% 
   group_by(acct) %&gt;% 
@@ -392,7 +411,7 @@ rebalance %&gt;%
 <td align="left">US Bond market</td>
 <td align="right">140</td>
 <td align="right">265</td>
-<td align="right">0.2120000</td>
+<td align="right">0.2120</td>
 </tr>
 <tr class="even">
 <td align="left">Roth IRA</td>
@@ -402,7 +421,7 @@ rebalance %&gt;%
 <td align="left">Data Center</td>
 <td align="right">289</td>
 <td align="right">289</td>
-<td align="right">0.2312000</td>
+<td align="right">0.2312</td>
 </tr>
 <tr class="odd">
 <td align="left">Roth IRA</td>
@@ -412,7 +431,7 @@ rebalance %&gt;%
 <td align="left">Real Estate</td>
 <td align="right">314</td>
 <td align="right">314</td>
-<td align="right">0.2512000</td>
+<td align="right">0.2512</td>
 </tr>
 <tr class="even">
 <td align="left">Roth IRA</td>
@@ -422,7 +441,7 @@ rebalance %&gt;%
 <td align="left">US Total market</td>
 <td align="right">185</td>
 <td align="right">310</td>
-<td align="right">0.2480000</td>
+<td align="right">0.2480</td>
 </tr>
 <tr class="odd">
 <td align="left">Roth IRA</td>
@@ -432,7 +451,7 @@ rebalance %&gt;%
 <td align="left">Int’l market</td>
 <td align="right">72</td>
 <td align="right">72</td>
-<td align="right">0.0576000</td>
+<td align="right">0.0576</td>
 </tr>
 <tr class="even">
 <td align="left">Taxable</td>
@@ -442,7 +461,7 @@ rebalance %&gt;%
 <td align="left">Experiential</td>
 <td align="right">605</td>
 <td align="right">605</td>
-<td align="right">0.5041667</td>
+<td align="right">0.4840</td>
 </tr>
 <tr class="odd">
 <td align="left">Taxable</td>
@@ -452,7 +471,7 @@ rebalance %&gt;%
 <td align="left">Healthcare</td>
 <td align="right">395</td>
 <td align="right">395</td>
-<td align="right">0.3291667</td>
+<td align="right">0.3160</td>
 </tr>
 <tr class="even">
 <td align="left">Taxable</td>
@@ -461,10 +480,170 @@ rebalance %&gt;%
 <td align="left">Stock ETF</td>
 <td align="left">Healthcare</td>
 <td align="right">0</td>
-<td align="right">200</td>
-<td align="right">0.1666667</td>
+<td align="right">250</td>
+<td align="right">0.2000</td>
 </tr>
 </tbody>
 </table>
-<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>This helps me think through how my allocations would look like by the end of the next quarter.</p>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="explore-securities-before-buying" class="section level1">
+<h1><span class="header-section-number">5</span> Explore securities before buying</h1>
+<p>VHT is a healthcare ETF that took a dip during March, but overall has been growing steadily. It is currently trending upwards again, and would’ve likely been a better purchase if executed back in April.</p>
+<p>The chart below is a ‘candlestick’ chart, widely used in finance to track the price movement of securities. It is similar to a boxplot, but instead of plotting quartiles, it plots daily prices (High, Open, Low, Close).</p>
+<pre class="r"><code>vht &lt;- tq_get(&quot;VHT&quot;,
+              get = &quot;stock.prices&quot;,
+              from = &quot;2015-01-01&quot;)
+
+p_vht &lt;- ggplot(vht,
+                aes(x = date, y = close)) +
+  geom_candlestick(aes(open = open, high = high, 
+                       low = low, close = close)) +
+  labs(y = &quot;Closing Price&quot;, x = &quot;&quot;,
+       title = &quot;Historical closing price of VHT&quot;,
+       subtitle = &quot;Past 5 years&quot;) +
+  theme_tq() +
+  scale_y_continuous(labels = scales::dollar)
+
+end &lt;- today() -1
+
+zoom_vht &lt;- p_vht + 
+  coord_x_date(xlim = c(end - lubridate::weeks(6), end),
+                ylim = c(155, 195)) +
+  # add simple moving avg trend line  - tidyquant feature
+  geom_ma(ma_fun = SMA, n = 15, color = &quot;darkblue&quot;, size = 1) +
+  labs(y = NULL, title = NULL, 
+       subtitle = &quot;Past 6 weeks&quot;,
+       caption = &quot;Dashed line represents Simple Moving Averages&quot;)
+
+p_vht / zoom_vht </code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/VHT-1.png" width="672" /></p>
+<blockquote>
+<p>Blue candles indicate the closing price was higher than the open; red candles indicate the opposite.</p>
+</blockquote>
+<p>Although movements can appear random, sometimes there are patterns that can be used for trading purposes based on the sequence of size and candle colors. You can read more <a href="https://www.investopedia.com/trading/candlestick-charting-what-is-it/">here.</a></p>
+<p>{{% alert note %}}
+<strong>Bottom line:</strong> Patterns can have meaning, but are not <em>guarantees</em>.
+{{% /alert %}}</p>
+<p>Additionally, I can easily compare VHT returns YTD to those of an S&amp;P 500 ETF. VHT has performed very similar to VOO, while holding a broad position in the healthcare sector only.</p>
+<pre class="r"><code>tq_get(c(&quot;VHT&quot;, &quot;VOO&quot;),
+       get = &quot;stock.prices&quot;,
+       from = &quot;2020-01-01&quot;) %&gt;% 
+  group_by(symbol) %&gt;% 
+  tq_transmute(adjusted, periodReturn, 
+               period = &quot;weekly&quot;,
+               col_rename = &quot;returns&quot;) %&gt;% 
+  ggplot(aes(date, returns)) +
+  geom_line(aes(color = symbol),
+            size = 1) +
+  theme_tq() +
+  scale_color_tq(theme = &quot;dark&quot;) +
+  labs(x = NULL, y = NULL, color = NULL, 
+       subtitle = &quot;YTD returns (weekly) of VHT compared to VOO (S&amp;P 500 ETF)&quot;) +
+  scale_y_continuous(labels = scales::percent)</code></pre>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/compare-etf-1.png" width="672" /></p>
+<blockquote>
+<p>This is ☝️ an over-simplification. To make robust comparisons, we’d have to statistically compare the asset returns (VHT) to the baseline returns (VOO)</p>
+</blockquote>
+</div>
+<div id="compare-current-vs-planned-allocation" class="section level1">
+<h1><span class="header-section-number">6</span> Compare current vs planned allocation</h1>
+<p>Now, new holdings aside, let’s rebalance my current allocations to <a href="https://www.npr.org/2018/12/12/676158680/your-cheat-sheet-for-smarter-investing">Swensen’s</a> allocation and see how they would’ve performed in the past six weeks.</p>
+<pre class="r"><code>rebalance &lt;- allocations %&gt;% 
+  mutate(acct = &quot;combined&quot;,
+         prop = case_when(
+           symbol == &quot;VTR&quot; ~ .05,
+           symbol == &quot;EPR&quot; ~ .05,
+           symbol == &quot;BND&quot; ~ .30,
+           symbol == &quot;VTI&quot; ~ .30,
+           symbol == &quot;VXUS&quot; ~ .20,
+           symbol == &quot;DLR&quot; ~ .05,
+           symbol == &quot;VNQ&quot; ~ .05)
+  )
+
+rebalance %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">acct</th>
+<th align="left">symbol</th>
+<th align="right">prop</th>
+<th align="left">asset_class</th>
+<th align="left">sector</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">combined</td>
+<td align="left">BND</td>
+<td align="right">0.30</td>
+<td align="left">Bond ETF</td>
+<td align="left">US Bond market</td>
+</tr>
+<tr class="even">
+<td align="left">combined</td>
+<td align="left">DLR</td>
+<td align="right">0.05</td>
+<td align="left">Equity REIT</td>
+<td align="left">Data Center</td>
+</tr>
+<tr class="odd">
+<td align="left">combined</td>
+<td align="left">VNQ</td>
+<td align="right">0.05</td>
+<td align="left">Stock ETF</td>
+<td align="left">Real Estate</td>
+</tr>
+<tr class="even">
+<td align="left">combined</td>
+<td align="left">VTI</td>
+<td align="right">0.30</td>
+<td align="left">Stock ETF</td>
+<td align="left">US Total market</td>
+</tr>
+<tr class="odd">
+<td align="left">combined</td>
+<td align="left">VXUS</td>
+<td align="right">0.20</td>
+<td align="left">Stock ETF</td>
+<td align="left">Int’l market</td>
+</tr>
+<tr class="even">
+<td align="left">combined</td>
+<td align="left">EPR</td>
+<td align="right">0.05</td>
+<td align="left">Equity REIT</td>
+<td align="left">Experiential</td>
+</tr>
+<tr class="odd">
+<td align="left">combined</td>
+<td align="left">VTR</td>
+<td align="right">0.05</td>
+<td align="left">Equity REIT</td>
+<td align="left">Healthcare</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/post/2020-05-15-ira-portfolio/index_files/figure-html/swensen-compare-1.png" width="672" /></p>
+<p>The Swensen allocation has fared a bit better day-to-day, avoiding drops like the -5% in returns seen in the current portfolio. But it also has not reached increases like the current portfolio. Overall, returns at the end of the observed period are very similar between allocations, but the volatility is quite different.</p>
+</div>
+<div id="conclusions" class="section level1">
+<h1><span class="header-section-number">7</span> Conclusions</h1>
+<p>📝</p>
+<ul>
+<li>To avoid volatility, I will need to add to holdings on a consistent basis (i.e. every paycheck, or month or quarter), but also track the allocation weights compared to plan.
+<ul>
+<li>Will probably also rebalance as a whole once a year.</li>
+</ul></li>
+<li><code>tidyquant</code> is a powerful package to help examine the performance of current portfolios, and historical performance of tentative purchases.
+<ul>
+<li>The package offers much more than presented here, with dozens of performance metrics implemented</li>
+</ul></li>
+<li>R is a great tool to help me track investments over time.
+<ul>
+<li>I’ve also started an RStudio project to help me implement a reproducible workflow</li>
+</ul></li>
+</ul>
 </div>

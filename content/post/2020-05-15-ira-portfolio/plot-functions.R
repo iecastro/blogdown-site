@@ -15,7 +15,7 @@ plot_returns <- function(returns, portfolio){
     geom_line(aes(color = symbol,
                   group = symbol),
               size = 1,
-              alpha = .7) +
+              alpha = .6) +
     geom_line(data = portfolio,
               aes(date, returns),
               size = 1.5) +

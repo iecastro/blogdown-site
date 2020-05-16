@@ -1,7 +1,7 @@
 ---
-title: "Making sense of investing for retirement"
+title: "Making sense of investing and portfolio performance"
 date: "2020-05-15"
-summary:
+summary: One of the funny things about the stock market is that every time one person buys, another sells, and both think they are astute. -William Feather
 image:
   caption: Image by [NeONBRAND](https://unsplash.com/photos/JW6r_0CPYec)
   focal_point: 'center'
@@ -12,7 +12,7 @@ output:
     toc_depth: 1
 url_code: "https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/index.Rmd"
 links:
-tags: [R, data viz]
+tags: [R, data viz, tidyquant]
 editor_options: 
   chunk_output_type: console
 ---
@@ -28,20 +28,20 @@ source("plot-functions.R")
 
 ```
 
-I recently started saving for retirement. I have a TSP account from military service, but there has been no contributions, or even a rebalance in 13 years. And now is a good time to get started. Don't get me wrong, we have been building our savings as a family, but every so often they were depleted - moved across states and had a baby (he's 9 now!), payed off credit card debt, closed on a house, that sort of thing.  
+I recently started saving for retirement. I've had a TSP account from military service, but there has been no contributions, or even a rebalance in 13 years. And now is a good time to get started. Don't get me wrong, we have been building our savings as a family, but every so often they were depleted - moved across states and had a baby (he's 9 now!), payed off credit card debt, closed on a house, that sort of thing.  
 
 So, I opened a Roth IRA and a taxable investing account last month.  Ever since, I've spent my evenings and workouts listening to podcasts and reading broadly about the topic.  I've taken some key points that have guided my buys so far:  
 
 * I can't beat the market, so low-cost [ETFs](https://investor.vanguard.com/etf/) are great options.  
-* I can invest in real estate by ivesting in [REITs](https://www.investopedia.com/terms/r/reit.asp).  
+* I can invest in real estate by investing in [REITs](https://www.investopedia.com/terms/r/reit.asp).  
 * Portfolios need diversified holdings, and a planned allocation for them. I plan to somewhat align with [David Swensen's](https://www.npr.org/2018/12/12/676158680/your-cheat-sheet-for-smarter-investing) recommended allocation by the end of the year.  
 
 
-{{% alert note %}}
+{{% alert warning %}}
 **Note:** Please don't take any of this as financial advise. This is simply what I've done for myself.
 {{% /alert %}}
 
-# You can do that in R!
+# You can do that in R! 
 
 Being an R user, I figured I could analyze my portfolio using R.  I came across the  [`tidyquant`](https://business-science.github.io/tidyquant/) package, which integrates several financial analysis packages into the `tidyverse` framework.
 
@@ -127,7 +127,7 @@ get_returns <- function(return_df, weight_df, growth = FALSE){
 port_combined <- returns_combined %>% 
   get_returns("combined")
 
-# plot reurns
+# plot returns
 p_combine <- plot_returns(returns_combined, port_combined) +
   labs(subtitle = "Combined portfolios")
 
@@ -136,7 +136,7 @@ p_combine
 
 ```
 
-Now, let's do this for each portfolio, and also examine the investment growth.
+Now, let's do this for each portfolio, and also examine the investment growth of a dollar.
 
 ```{r plot-portfolios, fig.height=11, fig.width=12}
 port_ira <- returns_combined %>% 
@@ -161,6 +161,8 @@ growth_ind <- returns_combined %>%
   get_returns("ind", growth = TRUE)
 
 #-- plots 
+# I wrote some plot functions and saved
+# them on a separate script 
 # code: https://github.com/iecastro/blogdown-site/blob/master/content/post/2020-05-15-ira-portfolio/plot-functions.R"
 
 # returns plots
@@ -188,17 +190,21 @@ p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
 
 ```
 
-Having different types of assets helps reduce volatility.  The taxable portfolio, which only holds two REITs has been the hardest hit by the current market trends. These REITs however, have historical high returns and are expected to bounce back.
+Having different types of assets helps reduce volatility.  The taxable portfolio, which only holds two REITs has been the hardest hit by the current market trends. These REITs however, have historical high returns and are expected to bounce back. As for growth, no big surprise here - a dollar invested last year is worth about the same today. 
 
-# 10-year growth 
+# Previous 10-year growth 
 
-No let's look at historical returns for the past ten years.
+`r emo::ji("moneybag")` `r emo::ji("moneybag")` `r emo::ji("moneybag")`
+
+Now let's look at historical returns for the past ten years.  For this we just need to update the **start_date** parameter and re-run the analysis.
 
 ```{r}
 start_date <- "2010-01-01"
 ```
 
-These portfolios increased 300% in value over ten years. Keeping holdings and allocations the same, \$10K put in the IRA account back in 2010, would now be worth \$30K.
+These portfolios would've increased 3x in value over ten years. Keeping holdings and allocations the same, a one-time deposit of \$10K into the IRA account back in 2010, would now be worth \$30K.
+
+If \$10K had been deposited into each account, the combined worth today would be \$40K; but also consider the combined worth back in December would have been \$60K. Volatility.
 
 
 ```{r plot-10yr-portfolios, echo = FALSE, fig.height=11, fig.width=12}
@@ -217,10 +223,10 @@ p_combine / (p_ira +  p_ind) / (grow_ira + grow_ind)
 
 ```
 
-Additionally, dividend distributions can be reinvested without additional capital. DLR has consistently increased their payouts over time, and VTI has increased in general, but it has a clear peaks-and-valleys pattern.  
+Total returns account for dividend distributions, but it does not account for dividens re-invested. Reinvesting dividends adds to your position, by owning more shares, above any additional capital. Historically, DLR has consistently increased their payouts over time. VTI has increased as well, in general; but it has a clear pattern of peaks-and-valleys.  
 
-```{r plot-div-hx, fig.width=10}
-# instead of sourcing the function
+```{r plot-div-hx, fig.height=8, fig.width=10}
+# instead of sourcing this function
 # you can download the dev version of tidyquant
 source("https://raw.githubusercontent.com/business-science/tidyquant/master/R/tq_get.R")
 
@@ -276,7 +282,9 @@ p_combine / (p_ira +  p_ind)
 
 However, it makes more sense to look at daily returns for such a short period of time.
 
-```{r, eval = FALSE}
+```{r plot-daily, fig.height=11, fig.width=12}
+start_date <- "2020-04-01"
+
 # daily returns
 returns_combined <- tq_get(unique(weights$symbol),  
                            get = "stock.prices",
@@ -286,31 +294,22 @@ returns_combined <- tq_get(unique(weights$symbol),
                period = "daily",  #<<
                col_rename = "Ra")
 
-```
-
-
-```{r plot-daily, echo = FALSE, fig.height=11, fig.width=12}
-start_date <- "2020-04-01"
-
-# monthly returns for individual securities
-returns_combined <- tq_get(unique(weights$symbol),  
-                           get = "stock.prices",
-                           from = start_date) %>% 
-  group_by(symbol) %>%
-  tq_transmute(adjusted, periodReturn, 
-               period = "daily",
-               col_rename = "Ra")
-
 source("run-performance.R")
+
+# for later comparison
+asis_combined <-  plot_returns(returns_combined, port_combined) +
+  labs(subtitle = "Performance of current portfolio allocations") +
+  geom_hline(yintercept = -.05, lty = "dashed") +
+  geom_hline(yintercept = .05, lty = "dashed")
 
 p_combine / (p_ira +  p_ind)
 
 ```
 
 
-# Allocations
+# Allocations 
 
-By assigning asset class and sector category to my current holdings, I can get an overview of my current allocations by type of securities I'm holding. 
+By assigning asset class and sector categories to my current holdings, I can get an overview of my current allocations beyond individual securities. 
 
 ```{r allocations}
 
@@ -376,7 +375,7 @@ rebalance <- allocations %>%
          new = case_when(
            symbol == "BND" ~ current + 125,
            symbol == "VTI" ~ current + 125,
-           symbol == "VHT" ~ current + 200,
+           symbol == "VHT" ~ current + 250,
            TRUE ~ current + 0
          )) %>% 
   group_by(acct) %>% 
@@ -388,6 +387,7 @@ rebalance %>%
 
 ```
 
+This helps me think through how my allocations would look like by the end of the next quarter.
 
 ```{r, echo=FALSE}
 rebalance %>% 
@@ -418,4 +418,147 @@ rebalance %>%
   facet_wrap(~acct)
 
 ```
+
+# Explore securities before buying
+
+VHT is a healthcare ETF that took a dip during March, but overall has been growing steadily.  It is currently trending upwards again, and would've likely been a better purchase if executed back in April. 
+
+The chart below is a 'candlestick' chart, widely used in finance to track the price movement of securities. It is similar to a boxplot, but instead of plotting quartiles, it plots daily prices (High, Open, Low, Close).  
+
+```{r VHT}
+vht <- tq_get("VHT",
+              get = "stock.prices",
+              from = "2015-01-01")
+
+p_vht <- ggplot(vht,
+                aes(x = date, y = close)) +
+  geom_candlestick(aes(open = open, high = high, 
+                       low = low, close = close)) +
+  labs(y = "Closing Price", x = "",
+       title = "Historical closing price of VHT",
+       subtitle = "Past 5 years") +
+  theme_tq() +
+  scale_y_continuous(labels = scales::dollar)
+
+end <- today() -1
+
+zoom_vht <- p_vht + 
+  coord_x_date(xlim = c(end - lubridate::weeks(6), end),
+                ylim = c(155, 195)) +
+  # add simple moving avg trend line  - tidyquant feature
+  geom_ma(ma_fun = SMA, n = 15, color = "darkblue", size = 1) +
+  labs(y = NULL, title = NULL, 
+       subtitle = "Past 6 weeks",
+       caption = "Dashed line represents Simple Moving Averages")
+
+p_vht / zoom_vht 
+
+```
+
+>Blue candles indicate the closing price was higher than the open; red candles indicate the opposite.  
+
+Although movements can appear random, sometimes there are patterns that can be used for trading purposes based on the sequence of size and  candle colors. You can read more [here.](https://www.investopedia.com/trading/candlestick-charting-what-is-it/)
+
+{{% alert note %}}
+**Bottom line:** Patterns can have meaning, but are not *guarantees*.
+{{% /alert %}}
+
+
+Additionally, I can easily compare VHT returns YTD to those of an S&P 500 ETF. VHT has performed very similar to VOO, while holding a broad position in the healthcare sector only.
+
+```{r compare-etf}
+tq_get(c("VHT", "VOO"),
+       get = "stock.prices",
+       from = "2020-01-01") %>% 
+  group_by(symbol) %>% 
+  tq_transmute(adjusted, periodReturn, 
+               period = "weekly",
+               col_rename = "returns") %>% 
+  ggplot(aes(date, returns)) +
+  geom_line(aes(color = symbol),
+            size = 1) +
+  theme_tq() +
+  scale_color_tq(theme = "dark") +
+  labs(x = NULL, y = NULL, color = NULL, 
+       subtitle = "YTD returns (weekly) of VHT compared to VOO (S&P 500 ETF)") +
+  scale_y_continuous(labels = scales::percent)
+
+```
+
+> This is `r emo::ji("index_pointing_up")` an over-simplification. To make robust comparisons, we'd have to statistically compare the asset returns (VHT) to the baseline returns (VOO)
+
+# Compare current vs planned allocation
+
+Now, new holdings aside, let's rebalance my current allocations to [Swensen's](https://www.npr.org/2018/12/12/676158680/your-cheat-sheet-for-smarter-investing) allocation and see how they would've performed in the past six weeks.
+
+```{r swensen-rebalance}
+rebalance <- allocations %>% 
+  mutate(acct = "combined",
+         prop = case_when(
+           symbol == "VTR" ~ .05,
+           symbol == "EPR" ~ .05,
+           symbol == "BND" ~ .30,
+           symbol == "VTI" ~ .30,
+           symbol == "VXUS" ~ .20,
+           symbol == "DLR" ~ .05,
+           symbol == "VNQ" ~ .05)
+  )
+
+rebalance %>% 
+  knitr::kable()
+
+```
+
+
+```{r swensen-compare, echo = FALSE}
+start_date <- "2020-04-01"
+
+new_weights <- rebalance %>% 
+  select(symbol, prop)  
+
+# daily returns
+returns_combined <- tq_get(unique(new_weights$symbol),  
+                           get = "stock.prices",
+                           from = start_date) %>% 
+  group_by(symbol) %>%
+  tq_transmute(adjusted, periodReturn, 
+               period = "daily",  #<<
+               col_rename = "Ra")
+
+port_combined <- returns_combined %>% 
+  tq_portfolio(assets_col = symbol,
+               returns_col = Ra,
+               weights = new_weights,
+               col_rename = "returns",
+               wealth.index = FALSE)
+
+# plot
+rebalanced_combined  <- plot_returns(returns_combined, port_combined) +
+  labs(subtitle = "Performance of Swensen allocation") +
+  geom_hline(yintercept = -.05, lty = "dashed") +
+  geom_hline(yintercept = .05, lty = "dashed")
+
+
+# patchwork
+rebalanced_combined / asis_combined
+
+```
+
+The Swensen allocation has fared a bit better day-to-day, avoiding drops like the -5% in returns seen in the current portfolio. But it also has not reached increases like the current portfolio. Overall, returns at the end of the observed period are very similar between allocations, but the volatility is quite different.
+
+# Conclusions 
+
+`r emo::ji("memo")` 
+
+- To avoid volatility, I will need to add to holdings on a consistent basis (i.e. every paycheck, or month or quarter), but also track the allocation weights compared to plan.  
+  - Will probably also rebalance as a whole once a year.
+
+- `tidyquant` is a powerful package to help examine the performance of current portfolios, and historical performance of tentative purchases.  
+  - The package offers much more than presented here, with dozens of performance metrics implemented  
+  
+- R is a great tool to help me track investments over time.  
+  - I've also started an RStudio project to help me implement a reproducible workflow  
+
+
+
 
