@@ -29,6 +29,16 @@ knitr::opts_chunk$set(echo = FALSE,
 A collection of plots using data from the #tidytuesday project  
 
 
+# Public spending on children (2020-09-15)  
+
+
+```{r, out.width="110%"}
+knitr::include_graphics("plots/2020-09-15-child-spending/pubhealth.png")
+
+```
+
+
+
 # Broadway Box Office
 
 ```{r}
