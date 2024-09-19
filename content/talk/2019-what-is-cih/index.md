@@ -26,7 +26,7 @@ tags: []
 title: Behavioral Health Research in Primary Care
 url_code: ""
 url_pdf: ""
-url_slides: "https://whatiscih.netlify.com/"
+url_slides: "https://whatiscih.netlify.app/"
 url_video: ""
 ---
 
