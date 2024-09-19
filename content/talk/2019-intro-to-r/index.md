@@ -25,7 +25,7 @@ tags: []
 title: Brief intro to R
 url_code: "https://github.com/iecastro/brief-intro-to-r"
 url_pdf: ""
-url_slides: "https://cih-briefr.netlify.com/"
+url_slides: "https://cih-briefr.netlify.app/"
 url_video: ""
 ---
 
